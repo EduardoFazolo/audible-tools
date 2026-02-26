@@ -25,6 +25,8 @@ const CHAPTERS_ICON_ORIGINAL_DISPLAY_ATTRIBUTE = "data-audible-tools-original-di
 const LOGO_REPLACEMENT_CLASS = "audible-tools-logo-replacement";
 const LOGO_ORIGINAL_CLASS = "audible-tools-logo-original";
 const LOGO_ASSET_PATH = "assets/audible-logo.svg";
+const PLAY_NOW_BUTTON_SELECTOR = '#adbl-buy-box-play-now-button, adbl-button[name="playButton"]';
+const DEFAULT_CONTENT_DELIVERY_TYPE = "SinglePartBook";
 const CONTROL_ICON_ASSET_PATHS = {
   menu: "assets/icon-menu.svg",
   previous: "assets/icon-previous.svg",
@@ -503,6 +505,14 @@ function isSupportedWebplayerUrl(rawUrl) {
 
 function isAudibleUrl(url) {
   return url.protocol === "https:" && WEBPLAYER_HOST_REGEX.test(url.hostname);
+}
+
+function isSupportedAudibleUrl(rawUrl) {
+  try {
+    return isAudibleUrl(new URL(rawUrl));
+  } catch {
+    return false;
+  }
 }
 
 function parseLinkUrl(link) {
@@ -1415,6 +1425,8 @@ function normalizeSettings(incoming) {
 }
 
 function applySettings(incoming) {
+  currentSettings = normalizeSettings(incoming);
+
   if (!isSupportedWebplayerUrl(window.location.href)) {
     applyDarkModeToPage(false);
     clearIconControlStyling();
@@ -1422,7 +1434,6 @@ function applySettings(incoming) {
     return;
   }
 
-  currentSettings = normalizeSettings(incoming);
   applyDarkModeToPage(currentSettings.darkTheme);
   if (currentSettings.darkTheme) {
     styleIconControls(document);
@@ -1457,16 +1468,90 @@ function getLinkFromEvent(event) {
   return null;
 }
 
+function getPlayNowButtonFromEvent(event) {
+  const isPlayButtonElement = (node) => node instanceof Element && node.matches(PLAY_NOW_BUTTON_SELECTOR);
+
+  if (typeof event.composedPath === "function") {
+    const path = event.composedPath();
+    for (const node of path) {
+      if (isPlayButtonElement(node)) {
+        return node;
+      }
+      if (node instanceof Element) {
+        const closestPlayButton = node.closest(PLAY_NOW_BUTTON_SELECTOR);
+        if (closestPlayButton) return closestPlayButton;
+      }
+    }
+  }
+
+  if (event.target instanceof Element) {
+    return event.target.closest(PLAY_NOW_BUTTON_SELECTOR);
+  }
+
+  return null;
+}
+
+function getPlayButtonAsin(button) {
+  const asinCandidates = [
+    button.getAttribute("asin"),
+    button.getAttribute("audibleasin"),
+    button.getAttribute("data-asin")
+  ];
+
+  for (const candidate of asinCandidates) {
+    const asin = String(candidate || "").trim();
+    if (asin) return asin;
+  }
+
+  return "";
+}
+
+function buildWebplayerUrlForAsin(button, asin) {
+  const webplayerUrl = new URL(`${window.location.origin}${WEBPLAYER_PATH}`);
+  const rawContentDeliveryType =
+    button.getAttribute("contentdeliverytype") || button.getAttribute("contentDeliveryType");
+  const contentDeliveryType = String(rawContentDeliveryType || DEFAULT_CONTENT_DELIVERY_TYPE).trim();
+
+  webplayerUrl.searchParams.set("asin", asin);
+  webplayerUrl.searchParams.set(
+    "contentDeliveryType",
+    contentDeliveryType || DEFAULT_CONTENT_DELIVERY_TYPE
+  );
+  webplayerUrl.searchParams.set("isSample", "false");
+  webplayerUrl.searchParams.set("ref_", `a_minerva_cloudplayer_${asin}`);
+  webplayerUrl.searchParams.set("overrideLph", "false");
+  webplayerUrl.searchParams.set("initialCPLaunch", "true");
+
+  return webplayerUrl.href;
+}
+
+function maybeHandlePlayNowClick(event) {
+  const playButton = getPlayNowButtonFromEvent(event);
+  if (!playButton) return false;
+
+  const asin = getPlayButtonAsin(playButton);
+  if (!asin) return false;
+
+  const webplayerUrl = buildWebplayerUrlForAsin(playButton, asin);
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  window.open(webplayerUrl, "_blank", "noopener");
+
+  return true;
+}
+
 function handleDocumentClick(event) {
-  if (currentSettings.darkTheme) {
+  const isWebplayerPage = isSupportedWebplayerUrl(window.location.href);
+  if (isWebplayerPage && currentSettings.darkTheme) {
     scheduleIconRefresh();
   }
 
-  if (!isSupportedWebplayerUrl(window.location.href)) return;
   if (!currentSettings.openInNewTab) return;
   if (event.defaultPrevented) return;
   if (event.button !== 0) return;
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  if (maybeHandlePlayNowClick(event)) return;
+  if (!isWebplayerPage) return;
 
   const link = getLinkFromEvent(event);
   if (!link || link.hasAttribute("download")) return;
@@ -1508,14 +1593,8 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   applySettings(nextSettings);
 });
 
-if (isSupportedWebplayerUrl(window.location.href)) {
+if (isSupportedAudibleUrl(window.location.href)) {
   document.addEventListener("click", handleDocumentClick, true);
-  window.addEventListener("pointerdown", resumeAudioContextIfNeeded, { passive: true });
-  window.addEventListener("keydown", resumeAudioContextIfNeeded, { passive: true });
-  styleIconControls(document);
-  collectAndApplyLinks(document);
-  collectAndApplyMedia(document);
-  startMediaObserver();
 
   chrome.runtime.sendMessage({ type: "request-settings" }, (response) => {
     if (chrome.runtime.lastError) {
@@ -1530,4 +1609,13 @@ if (isSupportedWebplayerUrl(window.location.href)) {
 
     loadSettingsFromStorage();
   });
+}
+
+if (isSupportedWebplayerUrl(window.location.href)) {
+  window.addEventListener("pointerdown", resumeAudioContextIfNeeded, { passive: true });
+  window.addEventListener("keydown", resumeAudioContextIfNeeded, { passive: true });
+  styleIconControls(document);
+  collectAndApplyLinks(document);
+  collectAndApplyMedia(document);
+  startMediaObserver();
 }
