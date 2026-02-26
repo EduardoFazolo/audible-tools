@@ -44,9 +44,9 @@ const VOLUME_WIDGET_STYLES = `
   width: min(520px, calc(100vw - 44px));
   margin: 4px auto 8px;
   padding: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
   color: var(--audible-tools-volume-copy);
   font-family: "Audible Sans", "Helvetica Neue", Arial, sans-serif;
   box-sizing: border-box;
@@ -303,6 +303,23 @@ html.${DARK_MODE_CLASS} :where(
 
 html.${DARK_MODE_CLASS} :where(progress, meter) {
   accent-color: var(--audible-tools-icon) !important;
+}
+
+html.${DARK_MODE_CLASS} :where(
+  [id*="slider" i],
+  [class*="slider" i],
+  [id*="progress" i],
+  [class*="progress" i],
+  [id*="seek" i],
+  [class*="seek" i],
+  [id*="scrubber" i],
+  [class*="scrubber" i]
+) {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
 html.${DARK_MODE_CLASS} :where(hr) {
