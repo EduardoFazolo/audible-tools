@@ -1,7 +1,8 @@
 const DEFAULT_SETTINGS = {
   openInNewTab: false,
   darkTheme: false,
-  volumeBoost: 100
+  volumeBoost: 100,
+  playbackSpeed: 1
 };
 
 const WEBPLAYER_HOST_REGEX = /^www\.audible\.[a-z.]+$/i;

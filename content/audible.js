@@ -1,7 +1,8 @@
 const DEFAULT_SETTINGS = {
   openInNewTab: false,
   darkTheme: false,
-  volumeBoost: 100
+  volumeBoost: 100,
+  playbackSpeed: 1
 };
 
 const WEBPLAYER_HOST_REGEX = /^www\.audible\.[a-z.]+$/i;
@@ -33,6 +34,15 @@ const DEFAULT_CONTENT_DELIVERY_TYPE = "SinglePartBook";
 const VOLUME_WIDGET_ID = "audible-tools-webplayer-volume";
 const VOLUME_WIDGET_STYLE_ID = "audible-tools-webplayer-volume-style";
 const VOLUME_WIDGET_SLIDER_CLASS = "audible-tools-webplayer-volume-slider";
+const SPEED_POPOVER_ID = "audible-tools-speed-popover";
+const SPEED_POPOVER_STYLE_ID = "audible-tools-speed-popover-style";
+const SPEED_POPOVER_RANGE_CLASS = "audible-tools-speed-popover-range";
+const SPEED_POPOVER_VALUE_CLASS = "audible-tools-speed-popover-value";
+const SPEED_POPOVER_PRESET_CLASS = "audible-tools-speed-popover-preset";
+const SPEED_PRESET_VALUES = [0.75, 1, 1.25, 1.5, 1.75, 2];
+const PLAYBACK_SPEED_MIN = 0.5;
+const PLAYBACK_SPEED_MAX = 3;
+const PLAYBACK_SPEED_STEP = 0.05;
 const VOLUME_WIDGET_STYLES = `
 #${VOLUME_WIDGET_ID} {
   --audible-tools-volume-copy: #0f1724;
@@ -177,6 +187,181 @@ const VOLUME_WIDGET_STYLES = `
     width: min(520px, calc(100vw - 28px));
     gap: 10px;
   }
+}
+`;
+const SPEED_POPOVER_STYLES = `
+#${SPEED_POPOVER_ID} {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2147483647;
+  width: min(328px, calc(100vw - 20px));
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 36, 0.16);
+  background: rgba(255, 255, 255, 0.98) !important;
+  color: #101723 !important;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.24);
+  display: none;
+  box-sizing: border-box;
+  font-family: "Audible Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+#${SPEED_POPOVER_ID}[data-open="true"] {
+  display: block;
+}
+
+#${SPEED_POPOVER_ID}[data-theme="dark"] {
+  border-color: rgba(81, 96, 122, 0.72);
+  background: rgba(18, 24, 36, 0.96) !important;
+  color: #ecf1f8 !important;
+}
+
+#${SPEED_POPOVER_ID} * {
+  box-sizing: border-box;
+}
+
+#${SPEED_POPOVER_ID} .audible-tools-speed-popover-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  opacity: 0.92;
+}
+
+#${SPEED_POPOVER_ID} .${SPEED_POPOVER_VALUE_CLASS} {
+  margin-top: 6px;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+#${SPEED_POPOVER_ID} .audible-tools-speed-popover-controls {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 36px 1fr 36px;
+  gap: 8px;
+  align-items: center;
+}
+
+#${SPEED_POPOVER_ID} button.audible-tools-speed-popover-step {
+  width: 36px !important;
+  height: 36px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: rgba(15, 23, 36, 0.1) !important;
+  color: inherit !important;
+  font-size: 1.35rem !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+}
+
+#${SPEED_POPOVER_ID}[data-theme="dark"] button.audible-tools-speed-popover-step {
+  background: rgba(236, 241, 248, 0.14) !important;
+}
+
+#${SPEED_POPOVER_ID} .${SPEED_POPOVER_RANGE_CLASS} {
+  width: 100%;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+#${SPEED_POPOVER_ID} .${SPEED_POPOVER_RANGE_CLASS}::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    #ffa100 0%,
+    #ffa100 var(--value, 20%),
+    rgba(15, 23, 36, 0.28) var(--value, 20%),
+    rgba(15, 23, 36, 0.28) 100%
+  );
+}
+
+#${SPEED_POPOVER_ID}[data-theme="dark"] .${SPEED_POPOVER_RANGE_CLASS}::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    to right,
+    #ffa100 0%,
+    #ffa100 var(--value, 20%),
+    rgba(236, 241, 248, 0.34) var(--value, 20%),
+    rgba(236, 241, 248, 0.34) 100%
+  );
+}
+
+#${SPEED_POPOVER_ID} .${SPEED_POPOVER_RANGE_CLASS}::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  border: 0;
+  border-radius: 50%;
+  background: #ffa100;
+}
+
+#${SPEED_POPOVER_ID} .${SPEED_POPOVER_RANGE_CLASS}::-moz-range-track {
+  height: 4px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(15, 23, 36, 0.28);
+}
+
+#${SPEED_POPOVER_ID}[data-theme="dark"] .${SPEED_POPOVER_RANGE_CLASS}::-moz-range-track {
+  background: rgba(236, 241, 248, 0.34);
+}
+
+#${SPEED_POPOVER_ID} .${SPEED_POPOVER_RANGE_CLASS}::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: #ffa100;
+}
+
+#${SPEED_POPOVER_ID} .${SPEED_POPOVER_RANGE_CLASS}::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 50%;
+  background: #ffa100;
+}
+
+#${SPEED_POPOVER_ID} .audible-tools-speed-popover-presets {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#${SPEED_POPOVER_ID} button.${SPEED_POPOVER_PRESET_CLASS} {
+  min-width: 58px !important;
+  height: 32px !important;
+  border: 1px solid rgba(15, 23, 36, 0.18) !important;
+  border-radius: 999px !important;
+  background: rgba(15, 23, 36, 0.08) !important;
+  color: inherit !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  padding: 0 12px !important;
+  cursor: pointer !important;
+}
+
+#${SPEED_POPOVER_ID}[data-theme="dark"] button.${SPEED_POPOVER_PRESET_CLASS} {
+  border-color: rgba(236, 241, 248, 0.18) !important;
+  background: rgba(236, 241, 248, 0.1) !important;
+}
+
+#${SPEED_POPOVER_ID} button.${SPEED_POPOVER_PRESET_CLASS}[aria-pressed="true"] {
+  border-color: #ffa100 !important;
+  background: rgba(255, 161, 0, 0.2) !important;
+  color: #ffa100 !important;
 }
 `;
 const CONTROL_ICON_ASSET_PATHS = {
@@ -677,6 +862,7 @@ html.${DARK_MODE_CLASS} :where(button, [role="button"], a[role="button"]):focus-
 let currentSettings = { ...DEFAULT_SETTINGS };
 let audioContext = null;
 let iconRefreshPending = false;
+let speedPopoverAnchor = null;
 
 const connectedMedia = new WeakMap();
 const observedMedia = new WeakSet();
@@ -1554,6 +1740,7 @@ function styleIconControls(root = document) {
   });
 
   syncBottomMenuCustomIcons();
+  syncBottomMenuSpeedLabel();
   syncChapterPanelTheme();
 
   if (!currentSettings.darkTheme) return;
@@ -1649,6 +1836,234 @@ function normalizeVolumeBoost(rawValue) {
   const parsed = Number(rawValue);
   if (!Number.isFinite(parsed)) return DEFAULT_SETTINGS.volumeBoost;
   return Math.max(0, Math.min(300, parsed));
+}
+
+function normalizePlaybackSpeed(rawValue) {
+  const parsed = Number(rawValue);
+  if (!Number.isFinite(parsed)) return DEFAULT_SETTINGS.playbackSpeed;
+
+  const clamped = Math.max(PLAYBACK_SPEED_MIN, Math.min(PLAYBACK_SPEED_MAX, parsed));
+  const stepped = Math.round(clamped / PLAYBACK_SPEED_STEP) * PLAYBACK_SPEED_STEP;
+  return Number(stepped.toFixed(2));
+}
+
+function formatPlaybackSpeed(value) {
+  const normalized = normalizePlaybackSpeed(value);
+  const raw = Number.isInteger(normalized * 10) ? normalized.toFixed(1) : normalized.toFixed(2);
+  return `${raw.replace(/\.00$/, ".0")}x`;
+}
+
+function safeSetLocalSettings(nextValues) {
+  if (!nextValues || typeof nextValues !== "object") return;
+
+  try {
+    if (typeof chrome === "undefined" || !chrome.runtime?.id) return;
+    chrome.storage.local.set(nextValues);
+  } catch {
+    // Ignore context invalidation from stale content scripts after extension reload.
+  }
+}
+
+function ensureSpeedPopoverStyles() {
+  const existing = document.getElementById(SPEED_POPOVER_STYLE_ID);
+  if (existing) return;
+
+  const styleTag = document.createElement("style");
+  styleTag.id = SPEED_POPOVER_STYLE_ID;
+  styleTag.textContent = SPEED_POPOVER_STYLES;
+
+  if (document.head) {
+    document.head.appendChild(styleTag);
+    return;
+  }
+
+  document.documentElement.appendChild(styleTag);
+}
+
+function getSpeedPopoverParts() {
+  const popover = document.getElementById(SPEED_POPOVER_ID);
+  if (!(popover instanceof HTMLElement)) return null;
+
+  const range = popover.querySelector(`.${SPEED_POPOVER_RANGE_CLASS}`);
+  const value = popover.querySelector(`.${SPEED_POPOVER_VALUE_CLASS}`);
+  const presets = popover.querySelectorAll(`button.${SPEED_POPOVER_PRESET_CLASS}`);
+  if (!(range instanceof HTMLInputElement) || !(value instanceof HTMLElement)) return null;
+
+  return { popover, range, value, presets: Array.from(presets) };
+}
+
+function isSpeedPopoverOpen() {
+  const parts = getSpeedPopoverParts();
+  return Boolean(parts?.popover.dataset.open === "true");
+}
+
+function closeSpeedPopover() {
+  const parts = getSpeedPopoverParts();
+  if (!parts) return;
+
+  parts.popover.dataset.open = "false";
+  speedPopoverAnchor = null;
+}
+
+function removeSpeedPopover() {
+  closeSpeedPopover();
+  const popover = document.getElementById(SPEED_POPOVER_ID);
+  if (popover) popover.remove();
+}
+
+function syncSpeedPopoverUi() {
+  const parts = getSpeedPopoverParts();
+  if (!parts) return;
+
+  const speed = normalizePlaybackSpeed(currentSettings.playbackSpeed);
+  const rangePercent = Math.round(((speed - PLAYBACK_SPEED_MIN) / (PLAYBACK_SPEED_MAX - PLAYBACK_SPEED_MIN)) * 100);
+  parts.popover.dataset.theme = currentSettings.darkTheme ? "dark" : "light";
+  parts.range.value = String(Math.round(speed * 100));
+  parts.range.style.setProperty("--value", `${rangePercent}%`);
+  parts.range.setAttribute("aria-valuetext", formatPlaybackSpeed(speed));
+  parts.value.textContent = formatPlaybackSpeed(speed);
+
+  parts.presets.forEach((presetButton) => {
+    const presetValue = Number(presetButton.dataset.speedValue);
+    presetButton.setAttribute("aria-pressed", String(Math.abs(presetValue - speed) < 0.001));
+  });
+}
+
+function syncBottomMenuSpeedLabel() {
+  const menu = document.getElementById("adbl-cloud-player-bottom-menu-area");
+  if (!(menu instanceof Element)) return;
+
+  const speedLabel = formatPlaybackSpeed(currentSettings.playbackSpeed);
+  const menuItems = Array.from(menu.children).filter((child) => child instanceof Element);
+  menuItems.forEach((item) => {
+    if (!isBottomMenuSpeedControl(item)) return;
+
+    const textTargets = item.querySelectorAll("span, p, small, strong, b, div");
+    for (const target of textTargets) {
+      const currentText = normalizeControlText(target.textContent);
+      if (!/^\d+(?:\.\d+)?x$/.test(currentText)) continue;
+      target.textContent = speedLabel;
+      break;
+    }
+  });
+}
+
+function positionSpeedPopover(anchor = speedPopoverAnchor) {
+  const parts = getSpeedPopoverParts();
+  if (!parts || !(anchor instanceof Element)) return;
+
+  const anchorRect = anchor.getBoundingClientRect();
+  const popoverWidth = Math.min(328, window.innerWidth - 20);
+  const safeLeft = Math.min(
+    Math.max(anchorRect.left + anchorRect.width / 2 - popoverWidth / 2, 10),
+    window.innerWidth - popoverWidth - 10
+  );
+
+  parts.popover.style.width = `${Math.round(popoverWidth)}px`;
+  parts.popover.style.left = `${Math.round(safeLeft)}px`;
+  parts.popover.style.top = "-9999px";
+
+  const popoverHeight = parts.popover.getBoundingClientRect().height || 220;
+  const preferredTop = anchorRect.top - popoverHeight - 12;
+  const fallbackTop = anchorRect.bottom + 10;
+  const safeTop = preferredTop >= 10
+    ? preferredTop
+    : Math.min(fallbackTop, window.innerHeight - popoverHeight - 10);
+
+  parts.popover.style.top = `${Math.round(Math.max(10, safeTop))}px`;
+}
+
+function applyPlaybackSpeedToMedia(mediaElement) {
+  if (!(mediaElement instanceof HTMLMediaElement)) return;
+
+  const speed = normalizePlaybackSpeed(currentSettings.playbackSpeed);
+  if (Math.abs(mediaElement.playbackRate - speed) > 0.001) {
+    mediaElement.playbackRate = speed;
+  }
+  if (Math.abs(mediaElement.defaultPlaybackRate - speed) > 0.001) {
+    mediaElement.defaultPlaybackRate = speed;
+  }
+}
+
+function applyPlaybackSpeed(value, { persist = false } = {}) {
+  const normalized = normalizePlaybackSpeed(value);
+  currentSettings.playbackSpeed = normalized;
+  document.querySelectorAll("audio, video").forEach((mediaElement) => {
+    applyPlaybackSpeedToMedia(mediaElement);
+  });
+  syncSpeedPopoverUi();
+  syncBottomMenuSpeedLabel();
+
+  if (persist) {
+    safeSetLocalSettings({ playbackSpeed: normalized });
+  }
+}
+
+function ensureSpeedPopover() {
+  if (!isSupportedWebplayerUrl(window.location.href)) return;
+
+  ensureSpeedPopoverStyles();
+
+  if (getSpeedPopoverParts()) {
+    syncSpeedPopoverUi();
+    return;
+  }
+
+  const popover = document.createElement("section");
+  popover.id = SPEED_POPOVER_ID;
+  popover.dataset.open = "false";
+  popover.setAttribute("aria-label", "Playback speed");
+  popover.innerHTML = `
+    <div class="audible-tools-speed-popover-title">Playback speed</div>
+    <div class="${SPEED_POPOVER_VALUE_CLASS}">1.0x</div>
+    <div class="audible-tools-speed-popover-controls">
+      <button type="button" class="audible-tools-speed-popover-step" data-step="-">−</button>
+      <input class="${SPEED_POPOVER_RANGE_CLASS}" type="range" min="${Math.round(PLAYBACK_SPEED_MIN * 100)}" max="${Math.round(PLAYBACK_SPEED_MAX * 100)}" step="${Math.round(PLAYBACK_SPEED_STEP * 100)}" />
+      <button type="button" class="audible-tools-speed-popover-step" data-step="+">+</button>
+    </div>
+    <div class="audible-tools-speed-popover-presets"></div>
+  `;
+
+  const presetsContainer = popover.querySelector(".audible-tools-speed-popover-presets");
+  if (presetsContainer) {
+    SPEED_PRESET_VALUES.forEach((value) => {
+      const preset = document.createElement("button");
+      preset.type = "button";
+      preset.className = SPEED_POPOVER_PRESET_CLASS;
+      preset.dataset.speedValue = String(value);
+      preset.textContent = formatPlaybackSpeed(value).replace(/x$/, "");
+      presetsContainer.appendChild(preset);
+    });
+  }
+
+  const stepButtons = popover.querySelectorAll("button.audible-tools-speed-popover-step");
+  stepButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const direction = button.getAttribute("data-step") === "+" ? 1 : -1;
+      applyPlaybackSpeed(currentSettings.playbackSpeed + direction * PLAYBACK_SPEED_STEP, { persist: true });
+    });
+  });
+
+  const range = popover.querySelector(`.${SPEED_POPOVER_RANGE_CLASS}`);
+  if (range instanceof HTMLInputElement) {
+    range.addEventListener("input", (event) => {
+      applyPlaybackSpeed(Number(event.target.value) / 100);
+    });
+    range.addEventListener("change", (event) => {
+      applyPlaybackSpeed(Number(event.target.value) / 100, { persist: true });
+    });
+  }
+
+  const presetButtons = popover.querySelectorAll(`button.${SPEED_POPOVER_PRESET_CLASS}`);
+  presetButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const presetValue = Number(button.dataset.speedValue);
+      applyPlaybackSpeed(presetValue, { persist: true });
+    });
+  });
+
+  (document.body || document.documentElement).appendChild(popover);
+  syncSpeedPopoverUi();
 }
 
 function ensureVolumeWidgetStyles() {
@@ -1763,7 +2178,7 @@ function ensureVolumeWidget() {
   slider.addEventListener("change", (event) => {
     const normalized = normalizeVolumeBoost(event.target.value);
     applyVolumeBoost(normalized);
-    chrome.storage.local.set({ volumeBoost: normalized });
+    safeSetLocalSettings({ volumeBoost: normalized });
   });
 
   widget.append(label, icon, slider);
@@ -1876,6 +2291,7 @@ function attachMediaWatch(mediaElement) {
 
   const enforceVolume = () => {
     applyVolumeToMedia(mediaElement);
+    applyPlaybackSpeedToMedia(mediaElement);
     if (currentSettings.darkTheme) {
       scheduleIconRefresh();
     }
@@ -1886,6 +2302,7 @@ function attachMediaWatch(mediaElement) {
   mediaElement.addEventListener("loadedmetadata", enforceVolume);
 
   applyVolumeToMedia(mediaElement);
+  applyPlaybackSpeedToMedia(mediaElement);
 }
 
 function collectAndApplyMedia(root = document) {
@@ -1956,7 +2373,11 @@ function normalizeSettings(incoming) {
     volumeBoost:
       incoming.volumeBoost !== undefined
         ? normalizeVolumeBoost(incoming.volumeBoost)
-        : currentSettings.volumeBoost
+        : currentSettings.volumeBoost,
+    playbackSpeed:
+      incoming.playbackSpeed !== undefined
+        ? normalizePlaybackSpeed(incoming.playbackSpeed)
+        : currentSettings.playbackSpeed
   };
 }
 
@@ -1968,9 +2389,13 @@ function applySettings(incoming) {
     clearIconControlStyling();
     removeCustomLogoReplacements();
     removeVolumeWidget();
+    removeSpeedPopover();
     return;
   }
 
+  ensureSpeedPopover();
+  syncSpeedPopoverUi();
+  applyPlaybackSpeed(currentSettings.playbackSpeed);
   ensureVolumeWidget();
   syncVolumeWidget();
   applyVolumeBoost(currentSettings.volumeBoost);
@@ -2080,10 +2505,96 @@ function maybeHandlePlayNowClick(event) {
   return true;
 }
 
+function getSpeedControlCardFromEvent(event) {
+  const extractSpeedCard = (node) => {
+    if (!(node instanceof Element)) return null;
+
+    const menuCard = node.closest("#adbl-cloud-player-bottom-menu-area > *");
+    if (menuCard && isBottomMenuSpeedControl(menuCard)) return menuCard;
+    if (isBottomMenuSpeedControl(node)) return node;
+    return null;
+  };
+
+  if (typeof event.composedPath === "function") {
+    for (const node of event.composedPath()) {
+      const speedCard = extractSpeedCard(node);
+      if (speedCard) return speedCard;
+    }
+  }
+
+  return extractSpeedCard(event.target);
+}
+
+function openSpeedPopover(anchor) {
+  if (!(anchor instanceof Element)) return;
+  ensureSpeedPopover();
+
+  const parts = getSpeedPopoverParts();
+  if (!parts) return;
+
+  speedPopoverAnchor = anchor;
+  syncSpeedPopoverUi();
+  parts.popover.dataset.open = "true";
+  positionSpeedPopover(anchor);
+}
+
+function toggleSpeedPopover(anchor) {
+  if (!(anchor instanceof Element)) return;
+
+  const isSameAnchor = speedPopoverAnchor === anchor;
+  if (isSameAnchor && isSpeedPopoverOpen()) {
+    closeSpeedPopover();
+    return;
+  }
+
+  openSpeedPopover(anchor);
+}
+
+function handleSpeedControlClick(event) {
+  if (!isSupportedWebplayerUrl(window.location.href)) return false;
+
+  const existingParts = getSpeedPopoverParts();
+
+  if (existingParts && event.target instanceof Element && event.target.closest(`#${SPEED_POPOVER_ID}`)) {
+    return true;
+  }
+
+  const speedCard = getSpeedControlCardFromEvent(event);
+  if (speedCard && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+    ensureSpeedPopover();
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    toggleSpeedPopover(speedCard);
+    return true;
+  }
+
+  if (existingParts && isSpeedPopoverOpen()) {
+    closeSpeedPopover();
+  }
+
+  return false;
+}
+
+function handleDocumentKeydown(event) {
+  if (event.key !== "Escape") return;
+  if (!isSpeedPopoverOpen()) return;
+
+  closeSpeedPopover();
+}
+
+function handleSpeedPopoverViewportChange() {
+  if (!isSpeedPopoverOpen()) return;
+  positionSpeedPopover();
+}
+
 function handleDocumentClick(event) {
   const isWebplayerPage = isSupportedWebplayerUrl(window.location.href);
   if (isWebplayerPage && currentSettings.darkTheme) {
     scheduleIconRefresh();
+  }
+
+  if (isWebplayerPage && handleSpeedControlClick(event)) {
+    return;
   }
 
   if (!currentSettings.openInNewTab) return;
@@ -2129,6 +2640,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   if (changes.openInNewTab) nextSettings.openInNewTab = changes.openInNewTab.newValue;
   if (changes.darkTheme) nextSettings.darkTheme = changes.darkTheme.newValue;
   if (changes.volumeBoost) nextSettings.volumeBoost = changes.volumeBoost.newValue;
+  if (changes.playbackSpeed) nextSettings.playbackSpeed = changes.playbackSpeed.newValue;
 
   applySettings(nextSettings);
 });
@@ -2154,6 +2666,10 @@ if (isSupportedAudibleUrl(window.location.href)) {
 if (isSupportedWebplayerUrl(window.location.href)) {
   window.addEventListener("pointerdown", resumeAudioContextIfNeeded, { passive: true });
   window.addEventListener("keydown", resumeAudioContextIfNeeded, { passive: true });
+  window.addEventListener("resize", handleSpeedPopoverViewportChange, { passive: true });
+  window.addEventListener("scroll", handleSpeedPopoverViewportChange, { passive: true });
+  document.addEventListener("keydown", handleDocumentKeydown, true);
+  ensureSpeedPopover();
   ensureVolumeWidget();
   styleIconControls(document);
   collectAndApplyLinks(document);
