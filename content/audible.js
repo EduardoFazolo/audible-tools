@@ -308,6 +308,101 @@ html.${DARK_MODE_CLASS} .${TEXT_ACCENT_CLASS} :where(
   color: var(--audible-tools-icon) !important;
 }
 
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  justify-content: space-between !important;
+  gap: 6px !important;
+  padding: 3px 4px 4px !important;
+  transform: translateY(50px) !important;
+}
+
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area > *:has(.${TEXT_ACCENT_CLASS}),
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area > .${TEXT_ACCENT_CLASS} {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  height: 66px !important;
+  min-height: 66px !important;
+  max-height: 66px !important;
+  padding: 2px 2px !important;
+  border: 1px solid var(--audible-tools-border) !important;
+  border-radius: 8px !important;
+  background: linear-gradient(180deg, rgba(52, 63, 88, 0.86), rgba(36, 45, 63, 0.94)) !important;
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  text-align: center !important;
+  font-size: 0.78rem !important;
+  line-height: 1.18 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area > *:has(.${TEXT_ACCENT_CLASS}) :where(
+  button,
+  [role="button"],
+  a[role="button"],
+  a
+),
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area > .${TEXT_ACCENT_CLASS} :where(
+  button,
+  [role="button"],
+  a[role="button"],
+  a
+) {
+  width: 100% !important;
+  min-height: 100% !important;
+  border: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area > *:has(.${TEXT_ACCENT_CLASS}) :where(
+  span,
+  p,
+  small,
+  strong,
+  b,
+  em,
+  label,
+  div,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6
+),
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area > .${TEXT_ACCENT_CLASS} :where(
+  span,
+  p,
+  small,
+  strong,
+  b,
+  em,
+  label,
+  div,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6
+) {
+  font-size: 0.94em !important;
+  line-height: 1.1 !important;
+}
+
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area > *:has(.${TEXT_ACCENT_CLASS}) :where(svg, img),
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area > .${TEXT_ACCENT_CLASS} :where(svg, img) {
+  max-width: 20px !important;
+  max-height: 20px !important;
+}
+
 html.${DARK_MODE_CLASS} .${LOGO_ORIGINAL_CLASS} {
   display: none !important;
 }
