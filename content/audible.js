@@ -13,6 +13,14 @@ const CUSTOM_ICON_CLASS = "audible-tools-custom-icon";
 const ICON_OVERLAY_CLASS = "audible-tools-icon-overlay";
 const ICON_TYPE_ATTRIBUTE = "data-audible-tools-icon-type";
 const TEXT_ACCENT_CLASS = "audible-tools-text-accent-control";
+const CHAPTERS_ICON_CLASS = "audible-tools-chapters-icon";
+const CHAPTERS_ICON_HOST_CLASS = "audible-tools-chapters-icon-host";
+const BOOKMARK_ICON_CLASS = "audible-tools-bookmark-icon";
+const BOOKMARK_ICON_HOST_CLASS = "audible-tools-bookmark-icon-host";
+const CHAPTERS_ICON_ORIGINAL_HIDDEN_CLASS = "audible-tools-chapters-icon-original-hidden";
+const CHAPTERS_ICON_ASSET_PATH = "assets/chapters.svg";
+const BOOKMARK_ICON_ASSET_PATH = "assets/bookmark.svg";
+const CHAPTERS_ICON_ORIGINAL_DISPLAY_ATTRIBUTE = "data-audible-tools-original-display";
 const LOGO_REPLACEMENT_CLASS = "audible-tools-logo-replacement";
 const LOGO_ORIGINAL_CLASS = "audible-tools-logo-original";
 const AUDIBLE_LOGO_MARKUP = `
@@ -401,6 +409,32 @@ html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area > *:has(.${TEXT_ACCE
 html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area > .${TEXT_ACCENT_CLASS} :where(svg, img) {
   max-width: 20px !important;
   max-height: 20px !important;
+}
+
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area img.${CHAPTERS_ICON_CLASS} {
+  display: inline-block !important;
+  object-position: center !important;
+  object-fit: contain !important;
+}
+
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area img.${BOOKMARK_ICON_CLASS} {
+  display: inline-block !important;
+  object-position: center !important;
+  object-fit: contain !important;
+}
+
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area .${CHAPTERS_ICON_HOST_CLASS}
+  :where(*):not(.${CHAPTERS_ICON_CLASS})::before,
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area .${CHAPTERS_ICON_HOST_CLASS}
+  :where(*):not(.${CHAPTERS_ICON_CLASS})::after {
+  content: none !important;
+}
+
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area .${BOOKMARK_ICON_HOST_CLASS}
+  :where(*):not(.${BOOKMARK_ICON_CLASS})::before,
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area .${BOOKMARK_ICON_HOST_CLASS}
+  :where(*):not(.${BOOKMARK_ICON_CLASS})::after {
+  content: none !important;
 }
 
 html.${DARK_MODE_CLASS} .${LOGO_ORIGINAL_CLASS} {
@@ -946,6 +980,163 @@ function applyTopLogoReplacement(root = document) {
   });
 }
 
+function isBottomMenuChapterControl(control) {
+  if (!(control instanceof Element)) return false;
+  if (!control.closest("#adbl-cloud-player-bottom-menu-area")) return false;
+
+  const descriptor = getControlDescriptor(control);
+  const textContent = normalizeControlText(control.textContent);
+  const combined = `${descriptor} ${textContent}`;
+
+  if (!/(capitul|chapter)/.test(combined)) return false;
+  if (/(anterior|previous|proxim|next|skip)/.test(combined)) return false;
+
+  return true;
+}
+
+function isBottomMenuBookmarkControl(control) {
+  if (!(control instanceof Element)) return false;
+  if (!control.closest("#adbl-cloud-player-bottom-menu-area")) return false;
+
+  const descriptor = getControlDescriptor(control);
+  const textContent = normalizeControlText(control.textContent);
+  const combined = `${descriptor} ${textContent}`;
+
+  if (!/(marcador|bookmark)/.test(combined)) return false;
+  if (/(capitul|chapter|anterior|previous|proxim|next|skip)/.test(combined)) return false;
+
+  return true;
+}
+
+function collectBottomMenuControlIconCandidates(host, labelPattern) {
+  if (!(host instanceof Element)) return [];
+
+  const candidates = new Set();
+  host.querySelectorAll("img, svg, picture, canvas").forEach((element) => {
+    candidates.add(element);
+  });
+
+  host.querySelectorAll("*").forEach((element) => {
+    if (!(element instanceof Element)) return;
+    if (element.classList.contains(CHAPTERS_ICON_CLASS) || element.classList.contains(BOOKMARK_ICON_CLASS)) return;
+
+    const textContent = normalizeControlText(element.textContent);
+    if (labelPattern instanceof RegExp && labelPattern.test(textContent)) return;
+
+    const rect = element.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    if (rect.width > 86 || rect.height > 86) return;
+
+    const style = window.getComputedStyle(element);
+    const backgroundImage = style.backgroundImage || "";
+    const maskImage = style.maskImage || style.webkitMaskImage || "";
+    const className =
+      typeof element.className === "string" ? element.className : element.className?.baseVal || "";
+    const classDescriptor = normalizeControlText(className);
+    const isLikelyIconClass = /(icon|glyph|symbol|menu|chapter|capitul|lista|list)/.test(classDescriptor);
+    const hasVisualBackground = backgroundImage !== "none" || maskImage !== "none";
+
+    const rawText = String(element.textContent || "").trim();
+    const isLikelySymbolText = rawText.length > 0 && rawText.length <= 4 && !/[a-z0-9]/i.test(rawText);
+
+    if (hasVisualBackground || isLikelyIconClass || isLikelySymbolText) {
+      candidates.add(element);
+    }
+  });
+
+  return Array.from(candidates);
+}
+
+function restoreBottomMenuCustomIconReplacements() {
+  document.querySelectorAll(`.${CHAPTERS_ICON_HOST_CLASS}, .${BOOKMARK_ICON_HOST_CLASS}`).forEach((host) => {
+    host.classList.remove(CHAPTERS_ICON_HOST_CLASS);
+    host.classList.remove(BOOKMARK_ICON_HOST_CLASS);
+  });
+
+  document.querySelectorAll(`img.${CHAPTERS_ICON_CLASS}, img.${BOOKMARK_ICON_CLASS}`).forEach((replacement) => {
+    replacement.remove();
+  });
+
+  document.querySelectorAll(`.${CHAPTERS_ICON_ORIGINAL_HIDDEN_CLASS}`).forEach((element) => {
+    const originalDisplay = element.getAttribute(CHAPTERS_ICON_ORIGINAL_DISPLAY_ATTRIBUTE);
+    if (originalDisplay === "__none__") {
+      element.style.removeProperty("display");
+    } else if (originalDisplay !== null) {
+      element.style.display = originalDisplay;
+    }
+    element.removeAttribute(CHAPTERS_ICON_ORIGINAL_DISPLAY_ATTRIBUTE);
+    element.classList.remove(CHAPTERS_ICON_ORIGINAL_HIDDEN_CLASS);
+  });
+}
+
+function applyBottomMenuCustomIcon(menuItems, isTargetControl, hostClass, replacementClass, assetPath, labelPattern) {
+  const iconUrl = chrome.runtime.getURL(assetPath);
+  menuItems.forEach((item) => {
+    if (!isTargetControl(item)) return;
+
+    item.classList.add(hostClass);
+
+    const iconCandidates = collectBottomMenuControlIconCandidates(item, labelPattern);
+    iconCandidates.forEach((iconElement) => {
+      if (!(iconElement instanceof Element)) return;
+      if (iconElement.classList.contains(CHAPTERS_ICON_CLASS) || iconElement.classList.contains(BOOKMARK_ICON_CLASS)) {
+        return;
+      }
+
+      if (!iconElement.hasAttribute(CHAPTERS_ICON_ORIGINAL_DISPLAY_ATTRIBUTE)) {
+        const originalDisplay = iconElement.style.display;
+        iconElement.setAttribute(
+          CHAPTERS_ICON_ORIGINAL_DISPLAY_ATTRIBUTE,
+          originalDisplay ? originalDisplay : "__none__"
+        );
+      }
+
+      iconElement.style.display = "none";
+      iconElement.classList.add(CHAPTERS_ICON_ORIGINAL_HIDDEN_CLASS);
+    });
+
+    const replacement = document.createElement("img");
+    replacement.className = replacementClass;
+    replacement.setAttribute("src", iconUrl);
+    replacement.setAttribute("alt", "");
+    replacement.setAttribute("aria-hidden", "true");
+
+    const firstContentChild = item.firstElementChild;
+    if (firstContentChild) {
+      item.insertBefore(replacement, firstContentChild);
+      return;
+    }
+
+    item.appendChild(replacement);
+  });
+}
+
+function syncBottomMenuCustomIcons() {
+  restoreBottomMenuCustomIconReplacements();
+  if (!currentSettings.darkTheme) return;
+
+  const menu = document.getElementById("adbl-cloud-player-bottom-menu-area");
+  if (!(menu instanceof Element)) return;
+
+  const menuItems = Array.from(menu.children).filter((child) => child instanceof Element);
+  applyBottomMenuCustomIcon(
+    menuItems,
+    isBottomMenuChapterControl,
+    CHAPTERS_ICON_HOST_CLASS,
+    CHAPTERS_ICON_CLASS,
+    CHAPTERS_ICON_ASSET_PATH,
+    /(capitul|chapter)/
+  );
+  applyBottomMenuCustomIcon(
+    menuItems,
+    isBottomMenuBookmarkControl,
+    BOOKMARK_ICON_HOST_CLASS,
+    BOOKMARK_ICON_CLASS,
+    BOOKMARK_ICON_ASSET_PATH,
+    /(marcador|bookmark|adicionar um marcador|add bookmark)/
+  );
+}
+
 function clearIconControlStyling() {
   document.querySelectorAll(`.${ICON_BUTTON_CLASS}`).forEach((element) => {
     element.classList.remove(ICON_BUTTON_CLASS);
@@ -965,6 +1156,8 @@ function clearIconControlStyling() {
     }
     element.remove();
   });
+
+  restoreBottomMenuCustomIconReplacements();
 }
 
 function styleIconControls(root = document) {
@@ -985,6 +1178,8 @@ function styleIconControls(root = document) {
       removeCustomIcon(candidate);
     }
   });
+
+  syncBottomMenuCustomIcons();
 
   if (!currentSettings.darkTheme) return;
 
