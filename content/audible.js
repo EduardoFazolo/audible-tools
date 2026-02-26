@@ -12,6 +12,17 @@ const ICON_BUTTON_CLASS = "audible-tools-icon-button";
 const CUSTOM_ICON_CLASS = "audible-tools-custom-icon";
 const ICON_OVERLAY_CLASS = "audible-tools-icon-overlay";
 const ICON_TYPE_ATTRIBUTE = "data-audible-tools-icon-type";
+const TEXT_ACCENT_CLASS = "audible-tools-text-accent-control";
+const LOGO_REPLACEMENT_CLASS = "audible-tools-logo-replacement";
+const LOGO_ORIGINAL_CLASS = "audible-tools-logo-original";
+const AUDIBLE_LOGO_MARKUP = `
+  <svg viewBox="0 0 44 24.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <polygon fill="currentColor" points="22,21.3 44,10.3 44,13.5 22,24.5 0,13.5 0,10.3"></polygon>
+    <path fill="currentColor" d="M28.3,15.3c-1.2-2.2-3.6-3.8-6.3-3.8c-2.7,0-5,1.6-6.3,3.8c0,0,1.4-1.4,3.7-1.4c2.3,0,4.2,1.4,5.2,3.2 C24.7,17,28.3,15.3,28.3,15.3z"></path>
+    <path fill="currentColor" d="M35.5,11.7c-3-5.5-9-9.2-15.7-9.2c-6,0-11.2,3-14.4,7.5c0,0,0,0-0.1,0.1C8.5,4.1,14.8,0,22,0 c7.2,0,13.8,4,17,9.9L35.5,11.7z"></path>
+    <path fill="currentColor" d="M30.1,14.4C30.1,14.4,30.1,14.4,30.1,14.4l3.6-1.8C31.3,8.6,27,5.9,22,5.9c-4.9,0-9.3,2.8-11.6,6.7 c2.2-2.5,5.5-4.2,9.1-4.2C24,8.3,27.9,10.8,30.1,14.4L30.1,14.4z"></path>
+  </svg>
+`;
 const DARK_MODE_STYLES = `
 html.${DARK_MODE_CLASS} {
   --audible-tools-bg: #10131a;
@@ -22,8 +33,8 @@ html.${DARK_MODE_CLASS} {
   --audible-tools-border: #333d4f;
   --audible-tools-copy: #e7eaf1;
   --audible-tools-muted: #a2a9b8;
-  --audible-tools-icon: #bb5302;
-  --audible-tools-focus: rgba(187, 83, 2, 0.34);
+  --audible-tools-icon: #ffa100;
+  --audible-tools-focus: rgba(255, 161, 0, 0.34);
   background: var(--audible-tools-bg) !important;
   color-scheme: dark !important;
 }
@@ -124,8 +135,8 @@ html.${DARK_MODE_CLASS} :where(
   [data-state="active"],
   .active
 ) {
-  background-color: rgba(187, 83, 2, 0.16) !important;
-  border-color: rgba(187, 83, 2, 0.44) !important;
+  background-color: rgba(255, 161, 0, 0.16) !important;
+  border-color: rgba(255, 161, 0, 0.44) !important;
 }
 
 html.${DARK_MODE_CLASS} :where(progress, meter) {
@@ -275,6 +286,44 @@ html.${DARK_MODE_CLASS} .${ICON_OVERLAY_CLASS} :where(text, tspan) {
   font-family: system-ui, sans-serif !important;
   font-weight: 700 !important;
   letter-spacing: -0.2px !important;
+}
+
+html.${DARK_MODE_CLASS} .${TEXT_ACCENT_CLASS},
+html.${DARK_MODE_CLASS} .${TEXT_ACCENT_CLASS} :where(
+  span,
+  p,
+  small,
+  strong,
+  b,
+  em,
+  label,
+  div,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6
+) {
+  color: var(--audible-tools-icon) !important;
+}
+
+html.${DARK_MODE_CLASS} .${LOGO_ORIGINAL_CLASS} {
+  display: none !important;
+}
+
+html.${DARK_MODE_CLASS} .${LOGO_REPLACEMENT_CLASS} {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 0 !important;
+  color: var(--audible-tools-icon) !important;
+  pointer-events: none !important;
+}
+
+html.${DARK_MODE_CLASS} .${LOGO_REPLACEMENT_CLASS} :where(svg) {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 html.${DARK_MODE_CLASS} :where(button, [role="button"], a[role="button"]):focus-visible {
@@ -572,6 +621,16 @@ function inferIconType(element, transportIconMap = null) {
   return null;
 }
 
+function shouldUseTextAccent(control) {
+  if (!(control instanceof Element)) return false;
+
+  const descriptor = getControlDescriptor(control);
+  const textContent = normalizeControlText(control.textContent);
+  const combined = `${descriptor} ${textContent}`;
+
+  return /(velocidade|speed|narracao|narration|1\.0x|capitul|chapter|marcador|bookmark)/.test(combined);
+}
+
 function getIconMarkup(type) {
   // Icon geometry adapted from Feather/Lucide open-source icon sets.
   switch (type) {
@@ -698,9 +757,107 @@ function collectControls(root = document) {
   return controls;
 }
 
+function collectImages(root = document) {
+  const images = [];
+
+  if (root instanceof HTMLImageElement) {
+    images.push(root);
+  }
+
+  if (root instanceof Element || root instanceof Document) {
+    images.push(...root.querySelectorAll("img"));
+  }
+
+  return images;
+}
+
+function getImageDescriptor(image) {
+  const className =
+    typeof image.className === "string" ? image.className : image.className?.baseVal || "";
+
+  return normalizeControlText(
+    [
+      image.getAttribute("alt"),
+      image.getAttribute("title"),
+      image.getAttribute("aria-label"),
+      className,
+      image.getAttribute("src")
+    ]
+      .filter(Boolean)
+      .join(" ")
+  );
+}
+
+function isLikelyAudibleTopLogoImage(image) {
+  if (!(image instanceof HTMLImageElement)) return false;
+  if (!image.isConnected) return false;
+  if (image.closest(`.${LOGO_REPLACEMENT_CLASS}`)) return false;
+
+  const rect = image.getBoundingClientRect();
+  if (!rect.width || !rect.height) return false;
+  if (rect.width < 34 || rect.width > 280) return false;
+  if (rect.height < 12 || rect.height > 96) return false;
+  if (rect.top > Math.max(180, window.innerHeight * 0.34)) return false;
+
+  const ratio = rect.width / Math.max(1, rect.height);
+  if (ratio < 1.2 || ratio > 4.9) return false;
+
+  const descriptor = getImageDescriptor(image);
+  if (/(audiobook|cover|capa|thumbnail|livro|book)/.test(descriptor)) return false;
+
+  if (/(audible|logo|brand|cloudplayer)/.test(descriptor)) return true;
+  if (image.closest("header, nav, [role='banner'], [role='navigation']")) return true;
+
+  const centerX = rect.left + rect.width / 2;
+  return centerX > window.innerWidth * 0.18 && centerX < window.innerWidth * 0.82;
+}
+
+function removeCustomLogoReplacements() {
+  document.querySelectorAll(`.${LOGO_REPLACEMENT_CLASS}`).forEach((replacement) => {
+    replacement.remove();
+  });
+
+  document.querySelectorAll(`img.${LOGO_ORIGINAL_CLASS}`).forEach((image) => {
+    image.classList.remove(LOGO_ORIGINAL_CLASS);
+  });
+}
+
+function replaceTopLogoImage(image) {
+  if (!(image instanceof HTMLImageElement)) return;
+  if (image.classList.contains(LOGO_ORIGINAL_CLASS)) return;
+
+  const rect = image.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+
+  const replacement = document.createElement("span");
+  replacement.className = LOGO_REPLACEMENT_CLASS;
+  replacement.setAttribute("aria-hidden", "true");
+  replacement.style.width = `${Math.round(rect.width)}px`;
+  replacement.style.height = `${Math.round(rect.height)}px`;
+  replacement.innerHTML = AUDIBLE_LOGO_MARKUP;
+
+  image.after(replacement);
+  image.classList.add(LOGO_ORIGINAL_CLASS);
+}
+
+function applyTopLogoReplacement(root = document) {
+  if (!currentSettings.darkTheme) return;
+
+  const candidates = collectImages(root);
+  candidates.forEach((image) => {
+    if (isLikelyAudibleTopLogoImage(image)) {
+      replaceTopLogoImage(image);
+    }
+  });
+}
+
 function clearIconControlStyling() {
   document.querySelectorAll(`.${ICON_BUTTON_CLASS}`).forEach((element) => {
     element.classList.remove(ICON_BUTTON_CLASS);
+  });
+
+  document.querySelectorAll(`.${TEXT_ACCENT_CLASS}`).forEach((element) => {
+    element.classList.remove(TEXT_ACCENT_CLASS);
   });
 
   document.querySelectorAll(`.${CUSTOM_ICON_CLASS}`).forEach((element) => {
@@ -721,6 +878,11 @@ function styleIconControls(root = document) {
   const candidates = collectControls(root);
 
   candidates.forEach((candidate) => {
+    candidate.classList.toggle(
+      TEXT_ACCENT_CLASS,
+      Boolean(currentSettings.darkTheme && shouldUseTextAccent(candidate))
+    );
+
     if (isIconLikeControl(candidate)) {
       candidate.classList.add(ICON_BUTTON_CLASS);
     } else {
@@ -940,6 +1102,7 @@ function collectAndApplyMedia(root = document) {
 function startMediaObserver() {
   const observer = new MutationObserver((mutations) => {
     let shouldRefreshIcons = false;
+    let shouldRefreshLogo = false;
 
     mutations.forEach((mutation) => {
       if (mutation.type === "childList") {
@@ -953,6 +1116,7 @@ function startMediaObserver() {
           collectAndApplyMedia(node);
           collectAndApplyLinks(node);
           shouldRefreshIcons = true;
+          shouldRefreshLogo = true;
         });
         return;
       }
@@ -962,11 +1126,17 @@ function startMediaObserver() {
           attachMediaWatch(mutation.target);
         }
         shouldRefreshIcons = true;
+        if (mutation.target instanceof HTMLImageElement) {
+          shouldRefreshLogo = true;
+        }
       }
     });
 
     if (currentSettings.darkTheme && shouldRefreshIcons) {
       scheduleIconRefresh();
+    }
+    if (currentSettings.darkTheme && shouldRefreshLogo) {
+      applyTopLogoReplacement(document);
     }
   });
 
@@ -999,6 +1169,7 @@ function applySettings(incoming) {
   if (!isSupportedWebplayerUrl(window.location.href)) {
     applyDarkModeToPage(false);
     clearIconControlStyling();
+    removeCustomLogoReplacements();
     return;
   }
 
@@ -1007,8 +1178,10 @@ function applySettings(incoming) {
   if (currentSettings.darkTheme) {
     styleIconControls(document);
     scheduleIconRefresh();
+    applyTopLogoReplacement(document);
   } else {
     clearIconControlStyling();
+    removeCustomLogoReplacements();
   }
   collectAndApplyLinks(document);
   collectAndApplyMedia(document);
