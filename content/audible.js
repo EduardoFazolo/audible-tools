@@ -22,6 +22,7 @@ const CHAPTERS_ICON_ORIGINAL_HIDDEN_CLASS = "audible-tools-chapters-icon-origina
 const CHAPTERS_ICON_ASSET_PATH = "assets/chapters.svg";
 const BOOKMARK_ICON_ASSET_PATH = "assets/bookmark.svg";
 const CHAPTERS_ICON_ORIGINAL_DISPLAY_ATTRIBUTE = "data-audible-tools-original-display";
+const BOTTOM_MENU_CARD_CLICK_BOUND_ATTRIBUTE = "data-audible-tools-card-click-bound";
 const LOGO_REPLACEMENT_CLASS = "audible-tools-logo-replacement";
 const LOGO_ORIGINAL_CLASS = "audible-tools-logo-original";
 const LOGO_ASSET_PATH = "assets/audible-logo.svg";
@@ -1165,6 +1166,94 @@ function isBottomMenuBookmarkControl(control) {
   return true;
 }
 
+function isBottomMenuSpeedControl(control) {
+  if (!(control instanceof Element)) return false;
+  if (!control.closest("#adbl-cloud-player-bottom-menu-area")) return false;
+
+  const descriptor = getControlDescriptor(control);
+  const textContent = normalizeControlText(control.textContent);
+  const combined = `${descriptor} ${textContent}`;
+
+  if (!/(velocidade|speed|narracao|narration|1\.0x|0\.9x|1\.1x|1\.2x|1\.3x|1\.4x|1\.5x|2\.0x)/.test(combined)) {
+    return false;
+  }
+  if (/(capitul|chapter|marcador|bookmark|anterior|previous|proxim|next|skip)/.test(combined)) return false;
+
+  return true;
+}
+
+function isBottomMenuActionCard(control) {
+  return (
+    isBottomMenuSpeedControl(control) ||
+    isBottomMenuChapterControl(control) ||
+    isBottomMenuBookmarkControl(control)
+  );
+}
+
+function isInteractiveElement(element) {
+  return (
+    element instanceof Element &&
+    element.matches("button, [role='button'], adbl-button, a[href], a[role='button'], input, select, textarea, label")
+  );
+}
+
+function getBottomMenuActionElement(card) {
+  if (!(card instanceof Element)) return null;
+  if (isInteractiveElement(card)) return card;
+
+  return (
+    card.querySelector("button, [role='button'], adbl-button, a[href], a[role='button']") ||
+    card.querySelector("[tabindex]:not([tabindex='-1'])")
+  );
+}
+
+function bindBottomMenuCardClick(card) {
+  if (!(card instanceof Element)) return;
+  if (card.getAttribute(BOTTOM_MENU_CARD_CLICK_BOUND_ATTRIBUTE) === "true") return;
+
+  card.setAttribute(BOTTOM_MENU_CARD_CLICK_BOUND_ATTRIBUTE, "true");
+  card.style.cursor = "pointer";
+  card.addEventListener("click", (event) => {
+    if (event.defaultPrevented) return;
+    if (event.button !== 0) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    const target = event.target;
+    if (target instanceof Element && target.closest("button, [role='button'], adbl-button, a[href], a[role='button']")) {
+      return;
+    }
+
+    const actionElement = getBottomMenuActionElement(card);
+    if (!(actionElement instanceof HTMLElement)) return;
+    if (actionElement === card) return;
+    if (actionElement.matches("[disabled], [aria-disabled='true']")) return;
+
+    event.preventDefault();
+    actionElement.dispatchEvent(
+      new MouseEvent("click", {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+        composed: true
+      })
+    );
+  });
+}
+
+function syncBottomMenuCardClickTargets() {
+  if (!currentSettings.darkTheme) return;
+
+  const menu = document.getElementById("adbl-cloud-player-bottom-menu-area");
+  if (!(menu instanceof Element)) return;
+
+  const menuItems = Array.from(menu.children).filter((child) => child instanceof Element);
+  menuItems.forEach((item) => {
+    if (isBottomMenuActionCard(item)) {
+      bindBottomMenuCardClick(item);
+    }
+  });
+}
+
 function collectBottomMenuControlIconCandidates(host, labelPattern) {
   if (!(host instanceof Element)) return [];
 
@@ -1293,6 +1382,8 @@ function syncBottomMenuCustomIcons() {
     BOOKMARK_ICON_ASSET_PATH,
     /(marcador|bookmark|adicionar um marcador|add bookmark)/
   );
+
+  syncBottomMenuCardClickTargets();
 }
 
 function clearIconControlStyling() {
