@@ -18,6 +18,8 @@ const CHAPTERS_ICON_CLASS = "audible-tools-chapters-icon";
 const CHAPTERS_ICON_HOST_CLASS = "audible-tools-chapters-icon-host";
 const BOOKMARK_ICON_CLASS = "audible-tools-bookmark-icon";
 const BOOKMARK_ICON_HOST_CLASS = "audible-tools-bookmark-icon-host";
+const CHAPTER_PANEL_HOST_CLASS = "audible-tools-chapter-panel-host";
+const CHAPTER_PANEL_ROW_CLASS = "audible-tools-chapter-panel-row";
 const CHAPTERS_ICON_ORIGINAL_HIDDEN_CLASS = "audible-tools-chapters-icon-original-hidden";
 const CHAPTERS_ICON_ASSET_PATH = "assets/chapters.svg";
 const BOOKMARK_ICON_ASSET_PATH = "assets/bookmark.svg";
@@ -614,6 +616,37 @@ html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area .${BOOKMARK_ICON_HOS
 html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area .${BOOKMARK_ICON_HOST_CLASS}
   :where(*):not(.${BOOKMARK_ICON_CLASS})::after {
   content: none !important;
+}
+
+html.${DARK_MODE_CLASS} .${CHAPTER_PANEL_HOST_CLASS} {
+  background: var(--audible-tools-bg-elevated) !important;
+}
+
+html.${DARK_MODE_CLASS} .${CHAPTER_PANEL_ROW_CLASS} {
+  background: var(--audible-tools-surface) !important;
+  border-color: var(--audible-tools-border) !important;
+}
+
+html.${DARK_MODE_CLASS} .${CHAPTER_PANEL_ROW_CLASS} :where(
+  div,
+  span,
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  small,
+  strong,
+  b,
+  em,
+  label,
+  a,
+  button,
+  [role="button"]
+) {
+  color: var(--audible-tools-copy) !important;
 }
 
 html.${DARK_MODE_CLASS} .${LOGO_ORIGINAL_CLASS} {
@@ -1254,6 +1287,97 @@ function syncBottomMenuCardClickTargets() {
   });
 }
 
+function isLikelyChapterPanelText(text) {
+  return /^(capitulo|chapter)\b|^(creditos iniciais|opening credits)\b/.test(text);
+}
+
+function isLikelyChapterPanelHeaderText(text) {
+  return /^(capitulos|chapters|fechar|close)\b/.test(text);
+}
+
+function findChapterPanelRowCandidate(element) {
+  let node = element;
+  while (node instanceof Element && node !== document.body && node !== document.documentElement) {
+    if (node.closest("#adbl-cloud-player-bottom-menu-area")) return null;
+
+    const rect = node.getBoundingClientRect();
+    if (
+      rect.width >= Math.max(260, window.innerWidth * 0.62) &&
+      rect.height >= 34 &&
+      rect.height <= Math.max(220, window.innerHeight * 0.28)
+    ) {
+      return node;
+    }
+
+    node = node.parentElement;
+  }
+
+  return null;
+}
+
+function findCommonAncestor(elements) {
+  if (!elements.length) return null;
+
+  let ancestor = elements[0]?.parentElement || null;
+  while (ancestor && ancestor !== document.body && ancestor !== document.documentElement) {
+    if (elements.every((element) => ancestor.contains(element))) {
+      const rect = ancestor.getBoundingClientRect();
+      if (
+        rect.width >= Math.max(320, window.innerWidth * 0.7) &&
+        rect.height >= Math.max(240, window.innerHeight * 0.34)
+      ) {
+        return ancestor;
+      }
+    }
+    ancestor = ancestor.parentElement;
+  }
+
+  return null;
+}
+
+function clearChapterPanelThemeClasses() {
+  document.querySelectorAll(`.${CHAPTER_PANEL_HOST_CLASS}`).forEach((element) => {
+    element.classList.remove(CHAPTER_PANEL_HOST_CLASS);
+  });
+
+  document.querySelectorAll(`.${CHAPTER_PANEL_ROW_CLASS}`).forEach((element) => {
+    element.classList.remove(CHAPTER_PANEL_ROW_CLASS);
+  });
+}
+
+function syncChapterPanelTheme() {
+  clearChapterPanelThemeClasses();
+  if (!currentSettings.darkTheme) return;
+
+  const textCandidates = Array.from(
+    document.querySelectorAll("span, p, div, h1, h2, h3, h4, h5, h6, button, a, li")
+  ).filter((element) => {
+    if (!(element instanceof Element)) return false;
+    if (!element.isConnected) return false;
+    if (element.closest("#adbl-cloud-player-bottom-menu-area")) return false;
+    return true;
+  });
+
+  const rowCandidates = new Set();
+  textCandidates.forEach((element) => {
+    const text = normalizeControlText(element.textContent);
+    if (!text || text.length > 140) return;
+    if (!isLikelyChapterPanelText(text) && !isLikelyChapterPanelHeaderText(text)) return;
+
+    const row = findChapterPanelRowCandidate(element);
+    if (row) rowCandidates.add(row);
+  });
+
+  const rows = Array.from(rowCandidates);
+  if (rows.length < 2) return;
+
+  rows.forEach((row) => row.classList.add(CHAPTER_PANEL_ROW_CLASS));
+  const host = findCommonAncestor(rows);
+  if (host) {
+    host.classList.add(CHAPTER_PANEL_HOST_CLASS);
+  }
+}
+
 function collectBottomMenuControlIconCandidates(host, labelPattern) {
   if (!(host instanceof Element)) return [];
 
@@ -1407,6 +1531,7 @@ function clearIconControlStyling() {
   });
 
   restoreBottomMenuCustomIconReplacements();
+  clearChapterPanelThemeClasses();
 }
 
 function styleIconControls(root = document) {
@@ -1429,6 +1554,7 @@ function styleIconControls(root = document) {
   });
 
   syncBottomMenuCustomIcons();
+  syncChapterPanelTheme();
 
   if (!currentSettings.darkTheme) return;
 
