@@ -39,7 +39,7 @@ const SPEED_POPOVER_STYLE_ID = "audible-tools-speed-popover-style";
 const SPEED_POPOVER_RANGE_CLASS = "audible-tools-speed-popover-range";
 const SPEED_POPOVER_VALUE_CLASS = "audible-tools-speed-popover-value";
 const SPEED_POPOVER_PRESET_CLASS = "audible-tools-speed-popover-preset";
-const SPEED_PRESET_VALUES = [0.75, 1, 1.25, 1.5, 1.75, 2];
+const SPEED_PRESET_VALUES = [0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3];
 const PLAYBACK_SPEED_MIN = 0.5;
 const PLAYBACK_SPEED_MAX = 3;
 const PLAYBACK_SPEED_STEP = 0.05;
@@ -337,6 +337,7 @@ const SPEED_POPOVER_STYLES = `
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  justify-content: center;
 }
 
 #${SPEED_POPOVER_ID} button.${SPEED_POPOVER_PRESET_CLASS} {
@@ -924,6 +925,7 @@ function isCurrentPageHashNavigation(url) {
 
 function isIconLikeControl(element) {
   if (!(element instanceof Element)) return false;
+  if (element.closest(`#${SPEED_POPOVER_ID}`)) return false;
 
   if (
     !element.matches('button, [role="button"], a[role="button"]')
@@ -1726,6 +1728,13 @@ function styleIconControls(root = document) {
   const candidates = collectControls(root);
 
   candidates.forEach((candidate) => {
+    if (candidate.closest(`#${SPEED_POPOVER_ID}`)) {
+      candidate.classList.remove(ICON_BUTTON_CLASS);
+      candidate.classList.remove(TEXT_ACCENT_CLASS);
+      removeCustomIcon(candidate);
+      return;
+    }
+
     candidate.classList.toggle(
       TEXT_ACCENT_CLASS,
       Boolean(currentSettings.darkTheme && shouldUseTextAccent(candidate))
