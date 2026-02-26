@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Audible Tools</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body data-theme="light">
+    <main class="panel">
+      <section class="panel-header">
+        <p class="kicker">Chrome Extension</p>
+        <h1>Audible Tools</h1>
+        <p class="subtitle">Fast controls for your Audible sessions.</p>
+      </section>
+
+      <section class="panel-body">
+        <div class="setting-row">
+          <div class="setting-copy">
+            <h2>Open Audible in new tab</h2>
+            <p>Force webplayer links to open in a separate tab.</p>
+          </div>
+          <label class="switch" for="openInNewTab">
+            <input id="openInNewTab" type="checkbox" />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-copy">
+            <h2>Dark Theme</h2>
+            <p>Re-skin the Audible webplayer UI with this dark palette.</p>
+          </div>
+          <label class="switch" for="darkTheme">
+            <input id="darkTheme" type="checkbox" />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="volume-card">
+          <div class="volume-head">
+            <h2>Volume</h2>
+            <output id="volumeValue" for="volumeBoost">100%</output>
+          </div>
+          <input
+            id="volumeBoost"
+            type="range"
+            min="0"
+            max="300"
+            step="5"
+            value="100"
+            aria-label="Audible volume boost"
+          />
+          <div class="volume-scale">
+            <span>Mute</span>
+            <span>Louder</span>
+          </div>
+        </div>
+      </section>
+
+      <footer class="panel-footer">
+        Applies only on <code>www.audible.com.br/webplayer</code>.
+      </footer>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

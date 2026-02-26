@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Audible Tools",
+  "description": "Utility controls for Audible with persistent settings and in-page volume boost.",
+  "version": "1.0.0",
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://www.audible.com.br/*"
+  ],
+  "action": {
+    "default_title": "Audible Tools",
+    "default_popup": "popup/popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.audible.com.br/webplayer*"
+      ],
+      "js": [
+        "content/audible.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
