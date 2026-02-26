@@ -27,6 +27,155 @@ const LOGO_ORIGINAL_CLASS = "audible-tools-logo-original";
 const LOGO_ASSET_PATH = "assets/audible-logo.svg";
 const PLAY_NOW_BUTTON_SELECTOR = '#adbl-buy-box-play-now-button, adbl-button[name="playButton"]';
 const DEFAULT_CONTENT_DELIVERY_TYPE = "SinglePartBook";
+const VOLUME_WIDGET_ID = "audible-tools-webplayer-volume";
+const VOLUME_WIDGET_STYLE_ID = "audible-tools-webplayer-volume-style";
+const VOLUME_WIDGET_SLIDER_CLASS = "audible-tools-webplayer-volume-slider";
+const VOLUME_WIDGET_STYLES = `
+#${VOLUME_WIDGET_ID} {
+  --audible-tools-volume-copy: #0f1724;
+  --audible-tools-volume-track: rgba(15, 23, 36, 0.2);
+  --audible-tools-volume-track-active: #ffa100;
+  --audible-tools-volume-thumb: #ffa100;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(520px, calc(100vw - 44px));
+  margin: 4px auto 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--audible-tools-volume-copy);
+  font-family: "Audible Sans", "Helvetica Neue", Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+#${VOLUME_WIDGET_ID}[data-layout="floating"] {
+  position: fixed;
+  left: 50%;
+  bottom: 98px;
+  transform: translateX(-50%);
+  margin: 0 auto;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  z-index: 2147483646;
+}
+
+#${VOLUME_WIDGET_ID}[data-layout="floating"][data-theme="dark"] {
+  background: rgba(18, 24, 36, 0.92);
+}
+
+#${VOLUME_WIDGET_ID}[data-theme="dark"] {
+  --audible-tools-volume-copy: #eef2f8;
+  --audible-tools-volume-track: rgba(238, 242, 248, 0.28);
+}
+
+#${VOLUME_WIDGET_ID}[data-theme="light"] {
+  --audible-tools-volume-copy: #101723;
+  --audible-tools-volume-track: rgba(16, 23, 35, 0.22);
+}
+
+#${VOLUME_WIDGET_ID} .audible-tools-webplayer-volume-icon {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  color: var(--audible-tools-volume-copy);
+  opacity: 0.82;
+}
+
+#${VOLUME_WIDGET_ID} .audible-tools-webplayer-volume-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  fill: currentColor;
+}
+
+#${VOLUME_WIDGET_ID} .audible-tools-webplayer-volume-sr {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  border: 0 !important;
+}
+
+#${VOLUME_WIDGET_ID} .${VOLUME_WIDGET_SLIDER_CLASS} {
+  flex: 1 1 auto;
+  min-width: 120px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+#${VOLUME_WIDGET_ID} .${VOLUME_WIDGET_SLIDER_CLASS}::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--audible-tools-volume-track-active) 0%,
+    var(--audible-tools-volume-track-active) var(--value, 33%),
+    var(--audible-tools-volume-track) var(--value, 33%),
+    var(--audible-tools-volume-track) 100%
+  );
+}
+
+#${VOLUME_WIDGET_ID} .${VOLUME_WIDGET_SLIDER_CLASS}::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--audible-tools-volume-thumb);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+#${VOLUME_WIDGET_ID} .${VOLUME_WIDGET_SLIDER_CLASS}::-moz-range-track {
+  height: 4px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--audible-tools-volume-track);
+}
+
+#${VOLUME_WIDGET_ID} .${VOLUME_WIDGET_SLIDER_CLASS}::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--audible-tools-volume-track-active);
+}
+
+#${VOLUME_WIDGET_ID} .${VOLUME_WIDGET_SLIDER_CLASS}::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--audible-tools-volume-thumb);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 640px) {
+  #${VOLUME_WIDGET_ID}[data-layout="floating"] {
+    bottom: 86px;
+  }
+
+  #${VOLUME_WIDGET_ID} {
+    width: min(520px, calc(100vw - 28px));
+    gap: 10px;
+  }
+}
+`;
 const CONTROL_ICON_ASSET_PATHS = {
   menu: "assets/icon-menu.svg",
   previous: "assets/icon-previous.svg",
@@ -785,8 +934,22 @@ function getControlIconAssetPath(type) {
   return CONTROL_ICON_ASSET_PATHS[type] || CONTROL_ICON_ASSET_PATHS.menu;
 }
 
+function getRuntimeAssetUrl(assetPath) {
+  if (!assetPath) return null;
+
+  try {
+    if (typeof chrome === "undefined" || !chrome.runtime?.id) {
+      return null;
+    }
+    return chrome.runtime.getURL(assetPath);
+  } catch {
+    return null;
+  }
+}
+
 function getIconMarkup(type) {
-  const iconSrc = chrome.runtime.getURL(getControlIconAssetPath(type));
+  const iconSrc = getRuntimeAssetUrl(getControlIconAssetPath(type));
+  if (!iconSrc) return "";
   return `<img class="${ICON_ASSET_CLASS}" src="${iconSrc}" alt="" aria-hidden="true">`;
 }
 
@@ -822,7 +985,13 @@ function applyCustomIcon(control, iconType) {
     control.appendChild(overlay);
   }
 
-  overlay.innerHTML = getIconMarkup(iconType);
+  const iconMarkup = getIconMarkup(iconType);
+  if (!iconMarkup) {
+    removeCustomIcon(control);
+    return;
+  }
+
+  overlay.innerHTML = iconMarkup;
   control.classList.add(CUSTOM_ICON_CLASS);
   control.setAttribute(ICON_TYPE_ATTRIBUTE, iconType);
 }
@@ -930,7 +1099,9 @@ function replaceTopLogoImage(image) {
   replacement.className = LOGO_REPLACEMENT_CLASS;
   replacement.setAttribute("aria-hidden", "true");
   replacement.setAttribute("alt", "");
-  replacement.setAttribute("src", chrome.runtime.getURL(LOGO_ASSET_PATH));
+  const logoAssetUrl = getRuntimeAssetUrl(LOGO_ASSET_PATH);
+  if (!logoAssetUrl) return;
+  replacement.setAttribute("src", logoAssetUrl);
   replacement.style.width = `${Math.round(rect.width)}px`;
   replacement.style.height = `${Math.round(rect.height)}px`;
 
@@ -1039,7 +1210,8 @@ function restoreBottomMenuCustomIconReplacements() {
 }
 
 function applyBottomMenuCustomIcon(menuItems, isTargetControl, hostClass, replacementClass, assetPath, labelPattern) {
-  const iconUrl = chrome.runtime.getURL(assetPath);
+  const iconUrl = getRuntimeAssetUrl(assetPath);
+  if (!iconUrl) return;
   menuItems.forEach((item) => {
     if (!isTargetControl(item)) return;
 
@@ -1245,6 +1417,136 @@ function normalizeVolumeBoost(rawValue) {
   return Math.max(0, Math.min(300, parsed));
 }
 
+function ensureVolumeWidgetStyles() {
+  const existing = document.getElementById(VOLUME_WIDGET_STYLE_ID);
+  if (existing) return;
+
+  const styleTag = document.createElement("style");
+  styleTag.id = VOLUME_WIDGET_STYLE_ID;
+  styleTag.textContent = VOLUME_WIDGET_STYLES;
+
+  if (document.head) {
+    document.head.appendChild(styleTag);
+    return;
+  }
+
+  document.documentElement.appendChild(styleTag);
+}
+
+function removeVolumeWidget() {
+  const widget = document.getElementById(VOLUME_WIDGET_ID);
+  if (widget) widget.remove();
+}
+
+function getVolumeWidgetParts() {
+  const widget = document.getElementById(VOLUME_WIDGET_ID);
+  if (!widget) return null;
+
+  const slider = widget.querySelector(`.${VOLUME_WIDGET_SLIDER_CLASS}`);
+  if (!(slider instanceof HTMLInputElement)) return null;
+
+  return { widget, slider };
+}
+
+function syncVolumeSliderVisual(slider, rawValue) {
+  if (!(slider instanceof HTMLInputElement)) return;
+  const normalized = normalizeVolumeBoost(rawValue);
+  const percent = Math.round((normalized / 300) * 100);
+  slider.style.setProperty("--value", `${percent}%`);
+  slider.setAttribute("aria-valuetext", `${normalized}%`);
+}
+
+function mountVolumeWidget(widget) {
+  const bottomMenu = document.getElementById("adbl-cloud-player-bottom-menu-area");
+  if (bottomMenu?.parentElement) {
+    bottomMenu.parentElement.insertBefore(widget, bottomMenu);
+    widget.dataset.layout = "inline";
+    return;
+  }
+
+  (document.body || document.documentElement).appendChild(widget);
+  widget.dataset.layout = "floating";
+}
+
+function applyVolumeBoost(value) {
+  const normalized = normalizeVolumeBoost(value);
+  currentSettings.volumeBoost = normalized;
+
+  const widgetParts = getVolumeWidgetParts();
+  if (widgetParts) {
+    widgetParts.slider.value = String(normalized);
+    syncVolumeSliderVisual(widgetParts.slider, normalized);
+  }
+
+  document.querySelectorAll("audio, video").forEach((mediaElement) => {
+    applyVolumeToMedia(mediaElement);
+  });
+}
+
+function ensureVolumeWidget() {
+  if (!isSupportedWebplayerUrl(window.location.href)) {
+    removeVolumeWidget();
+    return;
+  }
+
+  ensureVolumeWidgetStyles();
+
+  const existingWidget = document.getElementById(VOLUME_WIDGET_ID);
+  if (existingWidget) {
+    mountVolumeWidget(existingWidget);
+    syncVolumeWidget();
+    return;
+  }
+
+  const widget = document.createElement("section");
+  widget.id = VOLUME_WIDGET_ID;
+  widget.setAttribute("aria-label", "Audible Tools volume control");
+
+  const label = document.createElement("label");
+  label.className = "audible-tools-webplayer-volume-sr";
+  label.textContent = "Volume";
+
+  const icon = document.createElement("span");
+  icon.className = "audible-tools-webplayer-volume-icon";
+  icon.setAttribute("aria-hidden", "true");
+  icon.innerHTML =
+    '<svg viewBox="0 0 24 24" focusable="false"><path d="M4 9v6h4l5 4V5L8 9H4zm12.2 3a3.8 3.8 0 0 0-1.6-3.1v6.2c1-.7 1.6-1.8 1.6-3.1zm1.8 0a5.9 5.9 0 0 1-3.4 5.4v-2a4 4 0 0 0 0-6.8v-2A5.9 5.9 0 0 1 18 12z"/></svg>';
+
+  const slider = document.createElement("input");
+  slider.className = VOLUME_WIDGET_SLIDER_CLASS;
+  slider.type = "range";
+  slider.min = "0";
+  slider.max = "300";
+  slider.step = "5";
+  slider.id = `${VOLUME_WIDGET_ID}-input`;
+  slider.setAttribute("aria-label", "Volume");
+  label.setAttribute("for", slider.id);
+
+  slider.addEventListener("input", (event) => {
+    applyVolumeBoost(event.target.value);
+  });
+
+  slider.addEventListener("change", (event) => {
+    const normalized = normalizeVolumeBoost(event.target.value);
+    applyVolumeBoost(normalized);
+    chrome.storage.local.set({ volumeBoost: normalized });
+  });
+
+  widget.append(label, icon, slider);
+  mountVolumeWidget(widget);
+  syncVolumeWidget();
+}
+
+function syncVolumeWidget() {
+  const widgetParts = getVolumeWidgetParts();
+  if (!widgetParts) return;
+
+  widgetParts.widget.dataset.theme = currentSettings.darkTheme ? "dark" : "light";
+  const normalized = normalizeVolumeBoost(currentSettings.volumeBoost);
+  widgetParts.slider.value = String(normalized);
+  syncVolumeSliderVisual(widgetParts.slider, normalized);
+}
+
 function ensureDarkModeStyles() {
   const existing = document.getElementById(DARK_MODE_STYLE_ID);
   if (existing) return;
@@ -1431,9 +1733,13 @@ function applySettings(incoming) {
     applyDarkModeToPage(false);
     clearIconControlStyling();
     removeCustomLogoReplacements();
+    removeVolumeWidget();
     return;
   }
 
+  ensureVolumeWidget();
+  syncVolumeWidget();
+  applyVolumeBoost(currentSettings.volumeBoost);
   applyDarkModeToPage(currentSettings.darkTheme);
   if (currentSettings.darkTheme) {
     styleIconControls(document);
@@ -1614,6 +1920,7 @@ if (isSupportedAudibleUrl(window.location.href)) {
 if (isSupportedWebplayerUrl(window.location.href)) {
   window.addEventListener("pointerdown", resumeAudioContextIfNeeded, { passive: true });
   window.addEventListener("keydown", resumeAudioContextIfNeeded, { passive: true });
+  ensureVolumeWidget();
   styleIconControls(document);
   collectAndApplyLinks(document);
   collectAndApplyMedia(document);
