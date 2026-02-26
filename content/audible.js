@@ -4,13 +4,14 @@ const DEFAULT_SETTINGS = {
   volumeBoost: 100
 };
 
-const WEBPLAYER_HOST = "www.audible.com.br";
+const WEBPLAYER_HOST_REGEX = /^www\.audible\.[a-z.]+$/i;
 const WEBPLAYER_PATH = "/webplayer";
 const DARK_MODE_CLASS = "audible-tools-dark-mode";
 const DARK_MODE_STYLE_ID = "audible-tools-dark-mode-style";
 const ICON_BUTTON_CLASS = "audible-tools-icon-button";
 const CUSTOM_ICON_CLASS = "audible-tools-custom-icon";
 const ICON_OVERLAY_CLASS = "audible-tools-icon-overlay";
+const ICON_ASSET_CLASS = "audible-tools-icon-asset";
 const ICON_TYPE_ATTRIBUTE = "data-audible-tools-icon-type";
 const TEXT_ACCENT_CLASS = "audible-tools-text-accent-control";
 const CHAPTERS_ICON_CLASS = "audible-tools-chapters-icon";
@@ -23,14 +24,16 @@ const BOOKMARK_ICON_ASSET_PATH = "assets/bookmark.svg";
 const CHAPTERS_ICON_ORIGINAL_DISPLAY_ATTRIBUTE = "data-audible-tools-original-display";
 const LOGO_REPLACEMENT_CLASS = "audible-tools-logo-replacement";
 const LOGO_ORIGINAL_CLASS = "audible-tools-logo-original";
-const AUDIBLE_LOGO_MARKUP = `
-  <svg viewBox="0 0 44 24.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-    <polygon fill="currentColor" points="22,21.3 44,10.3 44,13.5 22,24.5 0,13.5 0,10.3"></polygon>
-    <path fill="currentColor" d="M28.3,15.3c-1.2-2.2-3.6-3.8-6.3-3.8c-2.7,0-5,1.6-6.3,3.8c0,0,1.4-1.4,3.7-1.4c2.3,0,4.2,1.4,5.2,3.2 C24.7,17,28.3,15.3,28.3,15.3z"></path>
-    <path fill="currentColor" d="M35.5,11.7c-3-5.5-9-9.2-15.7-9.2c-6,0-11.2,3-14.4,7.5c0,0,0,0-0.1,0.1C8.5,4.1,14.8,0,22,0 c7.2,0,13.8,4,17,9.9L35.5,11.7z"></path>
-    <path fill="currentColor" d="M30.1,14.4C30.1,14.4,30.1,14.4,30.1,14.4l3.6-1.8C31.3,8.6,27,5.9,22,5.9c-4.9,0-9.3,2.8-11.6,6.7 c2.2-2.5,5.5-4.2,9.1-4.2C24,8.3,27.9,10.8,30.1,14.4L30.1,14.4z"></path>
-  </svg>
-`;
+const LOGO_ASSET_PATH = "assets/audible-logo.svg";
+const CONTROL_ICON_ASSET_PATHS = {
+  menu: "assets/icon-menu.svg",
+  previous: "assets/icon-previous.svg",
+  rewind30: "assets/icon-rewind30.svg",
+  play: "assets/icon-play.svg",
+  pause: "assets/icon-pause.svg",
+  forward30: "assets/icon-forward30.svg",
+  next: "assets/icon-next.svg"
+};
 const DARK_MODE_STYLES = `
 html.${DARK_MODE_CLASS} {
   --audible-tools-bg: #10131a;
@@ -260,10 +263,13 @@ html.${DARK_MODE_CLASS} .${ICON_OVERLAY_CLASS} {
   color: var(--audible-tools-icon) !important;
 }
 
-html.${DARK_MODE_CLASS} .${ICON_OVERLAY_CLASS} :where(svg) {
+html.${DARK_MODE_CLASS} .${ICON_OVERLAY_CLASS} :where(svg, img.${ICON_ASSET_CLASS}) {
   width: 68% !important;
   height: 68% !important;
   overflow: visible !important;
+}
+
+html.${DARK_MODE_CLASS} .${ICON_OVERLAY_CLASS} :where(svg) {
   stroke: currentColor !important;
   stroke-width: 2 !important;
   stroke-linecap: round !important;
@@ -271,14 +277,18 @@ html.${DARK_MODE_CLASS} .${ICON_OVERLAY_CLASS} :where(svg) {
   fill: none !important;
 }
 
-html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS}[${ICON_TYPE_ATTRIBUTE}="play"] .${ICON_OVERLAY_CLASS} :where(svg),
-html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS}[${ICON_TYPE_ATTRIBUTE}="pause"] .${ICON_OVERLAY_CLASS} :where(svg) {
+html.${DARK_MODE_CLASS} .${ICON_OVERLAY_CLASS} :where(img.${ICON_ASSET_CLASS}) {
+  object-fit: contain !important;
+}
+
+html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS}[${ICON_TYPE_ATTRIBUTE}="play"] .${ICON_OVERLAY_CLASS} :where(svg, img.${ICON_ASSET_CLASS}),
+html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS}[${ICON_TYPE_ATTRIBUTE}="pause"] .${ICON_OVERLAY_CLASS} :where(svg, img.${ICON_ASSET_CLASS}) {
   width: 74% !important;
   height: 74% !important;
 }
 
-html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS}[${ICON_TYPE_ATTRIBUTE}="rewind30"] .${ICON_OVERLAY_CLASS} :where(svg),
-html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS}[${ICON_TYPE_ATTRIBUTE}="forward30"] .${ICON_OVERLAY_CLASS} :where(svg) {
+html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS}[${ICON_TYPE_ATTRIBUTE}="rewind30"] .${ICON_OVERLAY_CLASS} :where(svg, img.${ICON_ASSET_CLASS}),
+html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS}[${ICON_TYPE_ATTRIBUTE}="forward30"] .${ICON_OVERLAY_CLASS} :where(svg, img.${ICON_ASSET_CLASS}) {
   width: 76% !important;
   height: 76% !important;
 }
@@ -448,9 +458,10 @@ html.${DARK_MODE_CLASS} .${LOGO_REPLACEMENT_CLASS} {
   line-height: 0 !important;
   color: var(--audible-tools-icon) !important;
   pointer-events: none !important;
+  object-fit: contain !important;
 }
 
-html.${DARK_MODE_CLASS} .${LOGO_REPLACEMENT_CLASS} :where(svg) {
+html.${DARK_MODE_CLASS} .${LOGO_REPLACEMENT_CLASS} :where(svg, img) {
   width: 100% !important;
   height: 100% !important;
 }
@@ -482,7 +493,7 @@ function isSupportedWebplayerUrl(rawUrl) {
     const parsed = new URL(rawUrl);
     return (
       parsed.protocol === "https:" &&
-      parsed.hostname === WEBPLAYER_HOST &&
+      WEBPLAYER_HOST_REGEX.test(parsed.hostname) &&
       parsed.pathname.startsWith(WEBPLAYER_PATH)
     );
   } catch {
@@ -490,8 +501,8 @@ function isSupportedWebplayerUrl(rawUrl) {
   }
 }
 
-function isAudibleBrUrl(url) {
-  return url.protocol === "https:" && url.hostname === WEBPLAYER_HOST;
+function isAudibleUrl(url) {
+  return url.protocol === "https:" && WEBPLAYER_HOST_REGEX.test(url.hostname);
 }
 
 function parseLinkUrl(link) {
@@ -503,7 +514,7 @@ function parseLinkUrl(link) {
 }
 
 function isNavigableAudibleUrl(url) {
-  return isAudibleBrUrl(url);
+  return isAudibleUrl(url);
 }
 
 function isCurrentPageHashNavigation(url) {
@@ -760,66 +771,13 @@ function shouldUseTextAccent(control) {
   return /(velocidade|speed|narracao|narration|1\.0x|capitul|chapter|marcador|bookmark)/.test(combined);
 }
 
+function getControlIconAssetPath(type) {
+  return CONTROL_ICON_ASSET_PATHS[type] || CONTROL_ICON_ASSET_PATHS.menu;
+}
+
 function getIconMarkup(type) {
-  // Icon geometry adapted from Feather/Lucide open-source icon sets.
-  switch (type) {
-    case "previous":
-      return `
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <line x1="6.8" y1="4.8" x2="6.8" y2="19.2"></line>
-          <polyline points="17.4 5.8 9.2 12 17.4 18.2 17.4 5.8"></polyline>
-        </svg>
-      `;
-    case "rewind30":
-      return `
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-          <path d="M3 3v5h5"></path>
-          <text x="12" y="16" text-anchor="middle" font-size="7.2">30</text>
-        </svg>
-      `;
-    case "play":
-      return `
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="12" cy="12" r="9"></circle>
-          <polygon class="fill-current" points="10 8 17 12 10 16"></polygon>
-        </svg>
-      `;
-    case "pause":
-      return `
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="12" cy="12" r="9"></circle>
-          <line x1="10" y1="8.7" x2="10" y2="15.3"></line>
-          <line x1="14" y1="8.7" x2="14" y2="15.3"></line>
-        </svg>
-      `;
-    case "forward30":
-      return `
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <g transform="translate(24 0) scale(-1 1)">
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-            <path d="M3 3v5h5"></path>
-          </g>
-          <text x="12" y="16" text-anchor="middle" font-size="7.2">30</text>
-        </svg>
-      `;
-    case "next":
-      return `
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <line x1="17.2" y1="4.8" x2="17.2" y2="19.2"></line>
-          <polyline points="6.6 5.8 14.8 12 6.6 18.2 6.6 5.8"></polyline>
-        </svg>
-      `;
-    case "menu":
-    default:
-      return `
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <circle class="fill-current" cx="6" cy="12" r="1.8"></circle>
-          <circle class="fill-current" cx="12" cy="12" r="1.8"></circle>
-          <circle class="fill-current" cx="18" cy="12" r="1.8"></circle>
-        </svg>
-      `;
-  }
+  const iconSrc = chrome.runtime.getURL(getControlIconAssetPath(type));
+  return `<img class="${ICON_ASSET_CLASS}" src="${iconSrc}" alt="" aria-hidden="true">`;
 }
 
 function getDirectIconOverlay(control) {
@@ -958,12 +916,13 @@ function replaceTopLogoImage(image) {
   const rect = image.getBoundingClientRect();
   if (!rect.width || !rect.height) return;
 
-  const replacement = document.createElement("span");
+  const replacement = document.createElement("img");
   replacement.className = LOGO_REPLACEMENT_CLASS;
   replacement.setAttribute("aria-hidden", "true");
+  replacement.setAttribute("alt", "");
+  replacement.setAttribute("src", chrome.runtime.getURL(LOGO_ASSET_PATH));
   replacement.style.width = `${Math.round(rect.width)}px`;
   replacement.style.height = `${Math.round(rect.height)}px`;
-  replacement.innerHTML = AUDIBLE_LOGO_MARKUP;
 
   image.after(replacement);
   image.classList.add(LOGO_ORIGINAL_CLASS);
@@ -1520,7 +1479,7 @@ function handleDocumentClick(event) {
     return;
   }
 
-  if (!isAudibleBrUrl(nextUrl)) return;
+  if (!isAudibleUrl(nextUrl)) return;
   if (isCurrentPageHashNavigation(nextUrl)) return;
 
   event.preventDefault();

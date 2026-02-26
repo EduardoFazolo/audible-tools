@@ -8,7 +8,7 @@
     "tabs"
   ],
   "host_permissions": [
-    "https://www.audible.com.br/*"
+    "https://*/*"
   ],
   "action": {
     "default_title": "Audible Tools",
@@ -20,7 +20,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.audible.com.br/webplayer*"
+        "https://*/*"
       ],
       "js": [
         "content/audible.js"
@@ -34,7 +34,7 @@
         "assets/*.svg"
       ],
       "matches": [
-        "https://www.audible.com.br/*"
+        "https://*/*"
       ]
     }
   ]

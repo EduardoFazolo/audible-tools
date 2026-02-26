@@ -4,7 +4,7 @@ const DEFAULT_SETTINGS = {
   volumeBoost: 100
 };
 
-const WEBPLAYER_HOST = "www.audible.com.br";
+const WEBPLAYER_HOST_REGEX = /^www\.audible\.[a-z.]+$/i;
 const WEBPLAYER_PATH = "/webplayer";
 
 function isSupportedWebplayerUrl(url) {
@@ -14,7 +14,7 @@ function isSupportedWebplayerUrl(url) {
     const parsed = new URL(url);
     return (
       parsed.protocol === "https:" &&
-      parsed.hostname === WEBPLAYER_HOST &&
+      WEBPLAYER_HOST_REGEX.test(parsed.hostname) &&
       parsed.pathname.startsWith(WEBPLAYER_PATH)
     );
   } catch {
