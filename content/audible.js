@@ -790,18 +790,26 @@ html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area img.${BOOKMARK_ICON_
   object-fit: contain !important;
 }
 
-html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area .${CHAPTERS_ICON_HOST_CLASS}
-  :where(*):not(.${CHAPTERS_ICON_CLASS})::before,
-html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area .${CHAPTERS_ICON_HOST_CLASS}
-  :where(*):not(.${CHAPTERS_ICON_CLASS})::after {
-  content: none !important;
+/* Action Sheet & Drawer fixes */
+html.${DARK_MODE_CLASS} .bc-action-sheet-item,
+html.${DARK_MODE_CLASS} .bc-action-sheet-item :where(button, [role="button"], a),
+html.${DARK_MODE_CLASS} .bc-core-actionsheet-cancel,
+html.${DARK_MODE_CLASS} .bc-core-actionsheet-cancel :where(button, [role="button"], a) {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
-html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area .${BOOKMARK_ICON_HOST_CLASS}
-  :where(*):not(.${BOOKMARK_ICON_CLASS})::before,
-html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area .${BOOKMARK_ICON_HOST_CLASS}
-  :where(*):not(.${BOOKMARK_ICON_CLASS})::after {
-  content: none !important;
+html.${DARK_MODE_CLASS} .bc-core-actionsheet-cancel .bc-button {
+  background-color: var(--audible-tools-surface-raised) !important;
+  border: 1px solid var(--audible-tools-border) !important;
+  border-radius: 9999px !important;
+}
+
+/* Fix Bookmark missing hover underline (Audible omitted the <a> tag) */
+html.${DARK_MODE_CLASS} .adblCPMenuClipsBookmarksTray:hover .bc-size-action-large {
+  text-decoration: underline !important;
+  cursor: pointer !important;
 }
 
 html.${DARK_MODE_CLASS} .${CHAPTER_PANEL_HOST_CLASS} {
