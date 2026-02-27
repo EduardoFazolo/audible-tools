@@ -4,9 +4,7 @@ const DEFAULT_SETTINGS = {
   customTheme: {
     bg: "#10131a",
     surface: "#1d2230",
-    border: "#333d4f",
-    copy: "#e7eaf1",
-    icon: "#ffa100"
+    copy: "#e7eaf1"
   },
   volumeBoost: 100,
   playbackSpeed: 1
@@ -18,9 +16,7 @@ const customThemePanel = document.getElementById("customThemePanel");
 const colorInputs = {
   bg: document.getElementById("colorBg"),
   surface: document.getElementById("colorSurface"),
-  border: document.getElementById("colorBorder"),
-  copy: document.getElementById("colorCopy"),
-  icon: document.getElementById("colorIcon")
+  copy: document.getElementById("colorCopy")
 };
 const volumeBoostInput = document.getElementById("volumeBoost");
 const volumeValueOutput = document.getElementById("volumeValue");

@@ -4,9 +4,7 @@ const DEFAULT_SETTINGS = {
   customTheme: {
     bg: "#10131a",
     surface: "#1d2230",
-    border: "#333d4f",
-    copy: "#e7eaf1",
-    icon: "#ffa100"
+    copy: "#e7eaf1"
   },
   volumeBoost: 100,
   playbackSpeed: 1
@@ -35,7 +33,21 @@ const CHAPTERS_ICON_ORIGINAL_DISPLAY_ATTRIBUTE = "data-audible-tools-original-di
 const BOTTOM_MENU_CARD_CLICK_BOUND_ATTRIBUTE = "data-audible-tools-card-click-bound";
 const LOGO_REPLACEMENT_CLASS = "audible-tools-logo-replacement";
 const LOGO_ORIGINAL_CLASS = "audible-tools-logo-original";
-const LOGO_ASSET_PATH = "assets/audible-logo.svg";
+const SVG_PLAY = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="${ICON_ASSET_CLASS}"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><polygon points="10 8 17 12 10 16" fill="currentColor"/></svg>`;
+const SVG_PAUSE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="${ICON_ASSET_CLASS}"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><line x1="10" y1="8.7" x2="10" y2="15.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="8.7" x2="14" y2="15.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+const SVG_REWIND30 = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="${ICON_ASSET_CLASS}"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 3v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="12" y="16" text-anchor="middle" font-size="7.2" font-family="system-ui, sans-serif" font-weight="700" fill="currentColor">30</text></svg>`;
+const SVG_FORWARD30 = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="${ICON_ASSET_CLASS}"><g transform="translate(24 0) scale(-1 1)"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 3v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><text x="12" y="16" text-anchor="middle" font-size="7.2" font-family="system-ui, sans-serif" font-weight="700" fill="currentColor">30</text></svg>`;
+const SVG_PREVIOUS = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="${ICON_ASSET_CLASS}"><line x1="6.8" y1="4.8" x2="6.8" y2="19.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polyline points="17.4 5.8 9.2 12 17.4 18.2 17.4 5.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const SVG_NEXT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="${ICON_ASSET_CLASS}"><line x1="17.2" y1="4.8" x2="17.2" y2="19.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polyline points="6.6 5.8 14.8 12 6.6 18.2 6.6 5.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const SVG_MENU = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="${ICON_ASSET_CLASS}"><circle cx="6" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="18" cy="12" r="1.8" fill="currentColor"/></svg>`;
+
+const SVG_CHAPTERS = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="${CHAPTERS_ICON_CLASS}"><g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.1"><line x1="8.2" y1="6" x2="18.2" y2="6"/><line x1="8.2" y1="12" x2="18.2" y2="12"/><line x1="8.2" y1="18" x2="18.2" y2="18"/></g><g fill="currentColor"><circle cx="4.4" cy="6" r="1.4"/><circle cx="4.4" cy="12" r="1.4"/><circle cx="4.4" cy="18" r="1.4"/></g></svg>`;
+const SVG_BOOKMARK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="${BOOKMARK_ICON_CLASS}"><path d="M7 3.5h10v16l-5-2.9-5 2.9z" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8v5" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><path d="M9.5 10.5h5" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg>`;
+const SVG_DETAIL = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="audible-tools-drawer-icon"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 7h6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" /><path d="M9 11h6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" /></svg>`;
+const SVG_LIBRARY = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="audible-tools-drawer-icon"><path d="M4 19V5a2 2 0 0 1 2-2h13.4a.6.6 0 0 1 .6.6v13.8a2.6 2.6 0 0 1-2.6 2.6H6a2 2 0 0 1-2-2Z" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 17h14" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><path d="M9 7v6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><path d="M12 7v6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><path d="M15 7v4" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg>`;
+
+const SVG_LOGO = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 24.5" fill="none" aria-hidden="true" class="${ICON_ASSET_CLASS}"><polygon fill="currentColor" points="22,21.3 44,10.3 44,13.5 22,24.5 0,13.5 0,10.3"/><path fill="currentColor" d="M28.3,15.3c-1.2-2.2-3.6-3.8-6.3-3.8c-2.7,0-5,1.6-6.3,3.8c0,0,1.4-1.4,3.7-1.4c2.3,0,4.2,1.4,5.2,3.2C24.7,17,28.3,15.3,28.3,15.3z"/><path fill="currentColor" d="M35.5,11.7c-3-5.5-9-9.2-15.7-9.2c-6,0-11.2,3-14.4,7.5c0,0,0,0-0.1,0.1C8.5,4.1,14.8,0,22,0c7.2,0,13.8,4,17,9.9L35.5,11.7z"/><path fill="currentColor" d="M30.1,14.4L33.7,12.6C31.3,8.6,27,5.9,22,5.9c-4.9,0-9.3,2.8-11.6,6.7c2.2-2.5,5.5-4.2,9.1-4.2C24,8.3,27.9,10.8,30.1,14.4z"/></svg>`;
+
 const PLAY_NOW_BUTTON_SELECTOR = '#adbl-buy-box-play-now-button, adbl-button[name="playButton"]';
 const DEFAULT_CONTENT_DELIVERY_TYPE = "SinglePartBook";
 const VOLUME_WIDGET_ID = "audible-tools-webplayer-volume";
@@ -256,7 +268,7 @@ const SPEED_POPOVER_STYLES = `
   border: 0 !important;
   border-radius: 50% !important;
   background: rgba(15, 23, 36, 0.1) !important;
-  color: inherit !important;
+  color: var(--audible-tools-accent) !important;
   font-size: 1.35rem !important;
   font-weight: 700 !important;
   line-height: 1 !important;
@@ -266,6 +278,7 @@ const SPEED_POPOVER_STYLES = `
 
 #${SPEED_POPOVER_ID}[data-theme="dark"] button.audible-tools-speed-popover-step {
   background: rgba(236, 241, 248, 0.14) !important;
+  color: var(--audible-tools-accent) !important;
 }
 
 #${SPEED_POPOVER_ID} .${SPEED_POPOVER_RANGE_CLASS} {
@@ -388,10 +401,10 @@ html.${DARK_MODE_CLASS} {
   --audible-tools-surface: #1d2230;
   --audible-tools-surface-raised: #242b3a;
   --audible-tools-surface-strong: #2b3344;
-  --audible-tools-border: #333d4f;
+  --audible-tools-border: transparent;
   --audible-tools-copy: #e7eaf1;
   --audible-tools-muted: #a2a9b8;
-  --audible-tools-icon: #ffa100;
+  --audible-tools-icon: var(--audible-tools-copy);
   --audible-tools-focus: rgba(255, 161, 0, 0.34);
   background: var(--audible-tools-bg) !important;
   color-scheme: dark !important;
@@ -494,11 +507,11 @@ html.${DARK_MODE_CLASS} :where(
   .active
 ) {
   background-color: rgba(255, 161, 0, 0.16) !important;
-  border-color: rgba(255, 161, 0, 0.44) !important;
+  border-color: transparent !important;
 }
 
 html.${DARK_MODE_CLASS} :where(progress, meter) {
-  accent-color: var(--audible-tools-icon) !important;
+  accent-color: var(--audible-tools-accent) !important;
 }
 
 html.${DARK_MODE_CLASS} :where(
@@ -533,7 +546,7 @@ html.${DARK_MODE_CLASS} .${ICON_BUTTON_CLASS} {
   background: var(--audible-tools-surface-raised) !important;
   border: 1px solid var(--audible-tools-border) !important;
   border-radius: 14px !important;
-  color: var(--audible-tools-icon) !important;
+  color: var(--audible-tools-accent) !important;
   overflow: hidden !important;
 }
 
@@ -557,7 +570,7 @@ html.${DARK_MODE_CLASS} :where(
 ) {
   background: var(--audible-tools-surface-raised) !important;
   border: 1px solid var(--audible-tools-border) !important;
-  color: var(--audible-tools-icon) !important;
+  color: var(--audible-tools-accent) !important;
 }
 
 html.${DARK_MODE_CLASS} .${ICON_BUTTON_CLASS} :where(*) {
@@ -574,7 +587,8 @@ html.${DARK_MODE_CLASS} .${ICON_BUTTON_CLASS}::after {
 }
 
 html.${DARK_MODE_CLASS} .${ICON_BUTTON_CLASS} :where(svg) {
-  color: var(--audible-tools-icon) !important;
+  color: var(--audible-tools-accent) !important;
+  fill: var(--audible-tools-accent) !important;
 }
 
 html.${DARK_MODE_CLASS} .${ICON_BUTTON_CLASS} :where(
@@ -590,7 +604,8 @@ html.${DARK_MODE_CLASS} .${ICON_BUTTON_CLASS} :where(
 }
 
 html.${DARK_MODE_CLASS} .${ICON_BUTTON_CLASS} :where(text, tspan) {
-  fill: currentColor !important;
+  fill: var(--audible-tools-accent) !important;
+  color: var(--audible-tools-accent) !important;
   stroke: none !important;
 }
 
@@ -600,7 +615,7 @@ html.${DARK_MODE_CLASS} .${ICON_BUTTON_CLASS} :where([style*="background"]) {
 
 html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS} {
   position: relative !important;
-  color: var(--audible-tools-icon) !important;
+  color: var(--audible-tools-accent) !important;
 }
 
 html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS}::before,
@@ -624,10 +639,10 @@ html.${DARK_MODE_CLASS} .${ICON_OVERLAY_CLASS} {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  color: var(--audible-tools-icon) !important;
+  color: var(--audible-tools-accent) !important;
 }
 
-html.${DARK_MODE_CLASS} .${ICON_OVERLAY_CLASS} :where(svg, img.${ICON_ASSET_CLASS}) {
+html.${DARK_MODE_CLASS} .${ICON_OVERLAY_CLASS} :where(svg.${ICON_ASSET_CLASS}) {
   width: 68% !important;
   height: 68% !important;
   overflow: visible !important;
@@ -641,29 +656,27 @@ html.${DARK_MODE_CLASS} .${ICON_OVERLAY_CLASS} :where(svg) {
   fill: none !important;
 }
 
-html.${DARK_MODE_CLASS} .${ICON_OVERLAY_CLASS} :where(img.${ICON_ASSET_CLASS}) {
-  object-fit: contain !important;
-}
-
-html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS}[${ICON_TYPE_ATTRIBUTE}="play"] .${ICON_OVERLAY_CLASS} :where(svg, img.${ICON_ASSET_CLASS}),
-html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS}[${ICON_TYPE_ATTRIBUTE}="pause"] .${ICON_OVERLAY_CLASS} :where(svg, img.${ICON_ASSET_CLASS}) {
+html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS}[${ICON_TYPE_ATTRIBUTE}="play"] .${ICON_OVERLAY_CLASS} :where(svg.${ICON_ASSET_CLASS}),
+html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS}[${ICON_TYPE_ATTRIBUTE}="pause"] .${ICON_OVERLAY_CLASS} :where(svg.${ICON_ASSET_CLASS}) {
   width: 74% !important;
   height: 74% !important;
 }
 
-html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS}[${ICON_TYPE_ATTRIBUTE}="rewind30"] .${ICON_OVERLAY_CLASS} :where(svg, img.${ICON_ASSET_CLASS}),
-html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS}[${ICON_TYPE_ATTRIBUTE}="forward30"] .${ICON_OVERLAY_CLASS} :where(svg, img.${ICON_ASSET_CLASS}) {
+html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS}[${ICON_TYPE_ATTRIBUTE}="rewind30"] .${ICON_OVERLAY_CLASS} :where(svg.${ICON_ASSET_CLASS}),
+html.${DARK_MODE_CLASS} .${CUSTOM_ICON_CLASS}[${ICON_TYPE_ATTRIBUTE}="forward30"] .${ICON_OVERLAY_CLASS} :where(svg.${ICON_ASSET_CLASS}) {
   width: 76% !important;
   height: 76% !important;
 }
 
 html.${DARK_MODE_CLASS} .${ICON_OVERLAY_CLASS} .fill-current {
-  fill: currentColor !important;
+  fill: var(--audible-tools-accent) !important;
+  color: var(--audible-tools-accent) !important;
   stroke: none !important;
 }
 
 html.${DARK_MODE_CLASS} .${ICON_OVERLAY_CLASS} :where(text, tspan) {
-  fill: currentColor !important;
+  fill: var(--audible-tools-accent) !important;
+  color: var(--audible-tools-accent) !important;
   stroke: none !important;
   font-family: system-ui, sans-serif !important;
   font-weight: 700 !important;
@@ -779,22 +792,20 @@ html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area > .${TEXT_ACCENT_CLA
   line-height: 1.1 !important;
 }
 
-html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area > *:has(.${TEXT_ACCENT_CLASS}) :where(svg, img),
-html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area > .${TEXT_ACCENT_CLASS} :where(svg, img) {
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area > *:has(.${TEXT_ACCENT_CLASS}) :where(svg, span.${ICON_ASSET_CLASS}),
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area > .${TEXT_ACCENT_CLASS} :where(svg, span.${ICON_ASSET_CLASS}) {
   max-width: 20px !important;
   max-height: 20px !important;
 }
 
-html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area img.${CHAPTERS_ICON_CLASS} {
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area svg.${CHAPTERS_ICON_CLASS} {
   display: inline-block !important;
-  object-position: center !important;
-  object-fit: contain !important;
+  color: var(--audible-tools-accent) !important;
 }
 
-html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area img.${BOOKMARK_ICON_CLASS} {
+html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area svg.${BOOKMARK_ICON_CLASS} {
   display: inline-block !important;
-  object-position: center !important;
-  object-fit: contain !important;
+  color: var(--audible-tools-accent) !important;
 }
 
 /* Action Sheet & Drawer fixes */
@@ -825,8 +836,7 @@ html.${DARK_MODE_CLASS} .audible-tools-drawer-icon {
   display: inline-block !important;
   width: 24px !important;
   height: 24px !important;
-  object-fit: contain !important;
-  object-position: center !important;
+  color: var(--audible-tools-accent) !important;
   margin-right: -4px !important;
   vertical-align: middle !important;
 }
@@ -871,14 +881,25 @@ html.${DARK_MODE_CLASS} .${LOGO_REPLACEMENT_CLASS} {
   align-items: center !important;
   justify-content: center !important;
   line-height: 0 !important;
-  color: var(--audible-tools-icon) !important;
+  color: var(--audible-tools-accent) !important;
   pointer-events: none !important;
   object-fit: contain !important;
 }
 
-html.${DARK_MODE_CLASS} .${LOGO_REPLACEMENT_CLASS} :where(svg, img) {
+html.${DARK_MODE_CLASS} .${LOGO_REPLACEMENT_CLASS} :where(svg, span.${ICON_ASSET_CLASS}) {
   width: 100% !important;
   height: 100% !important;
+}
+
+html.${DARK_MODE_CLASS} .${LOGO_REPLACEMENT_CLASS} :where(span.${ICON_ASSET_CLASS}) {
+  display: block !important;
+  background-color: currentColor !important;
+  -webkit-mask-size: contain !important;
+  -webkit-mask-repeat: no-repeat !important;
+  -webkit-mask-position: center !important;
+  mask-size: contain !important;
+  mask-repeat: no-repeat !important;
+  mask-position: center !important;
 }
 
 html.${DARK_MODE_CLASS} :where(button, [role="button"], a[role="button"]):focus-visible {
@@ -1202,9 +1223,8 @@ function getControlIconAssetPath(type) {
 
 function getRuntimeAssetUrl(assetPath) {
   if (!assetPath) return null;
-
   try {
-    if (typeof chrome === "undefined" || !chrome.runtime?.id) {
+    if (assetPath.startsWith("chrome-extension://")) {
       return null;
     }
     return chrome.runtime.getURL(assetPath);
@@ -1214,9 +1234,22 @@ function getRuntimeAssetUrl(assetPath) {
 }
 
 function getIconMarkup(type) {
-  const iconSrc = getRuntimeAssetUrl(getControlIconAssetPath(type));
-  if (!iconSrc) return "";
-  return `<img class="${ICON_ASSET_CLASS}" src="${iconSrc}" alt="" aria-hidden="true">`;
+  switch (type) {
+    case "play": return SVG_PLAY;
+    case "pause": return SVG_PAUSE;
+    case "rewind30": return SVG_REWIND30;
+    case "forward30": return SVG_FORWARD30;
+    case "previous": return SVG_PREVIOUS;
+    case "next": return SVG_NEXT;
+    case "menu": return SVG_MENU;
+    default: return "";
+  }
+}
+
+function reinjectBottomMenuIcon(container, className, type) {
+  if (container.querySelector(`.${className}`)) return;
+  const svgMarkup = type === 'chapters' ? SVG_CHAPTERS : SVG_BOOKMARK;
+  container.innerHTML = svgMarkup;
 }
 
 function getDirectIconOverlay(control) {
@@ -1361,17 +1394,13 @@ function replaceTopLogoImage(image) {
   const rect = image.getBoundingClientRect();
   if (!rect.width || !rect.height) return;
 
-  const replacement = document.createElement("img");
-  replacement.className = LOGO_REPLACEMENT_CLASS;
-  replacement.setAttribute("aria-hidden", "true");
-  replacement.setAttribute("alt", "");
-  const logoAssetUrl = getRuntimeAssetUrl(LOGO_ASSET_PATH);
-  if (!logoAssetUrl) return;
-  replacement.setAttribute("src", logoAssetUrl);
-  replacement.style.width = `${Math.round(rect.width)}px`;
-  replacement.style.height = `${Math.round(rect.height)}px`;
+  const wrapper = document.createElement("span");
+  wrapper.className = LOGO_REPLACEMENT_CLASS;
+  wrapper.style.width = `${Math.round(rect.width)}px`;
+  wrapper.style.height = `${Math.round(rect.height)}px`;
+  wrapper.innerHTML = SVG_LOGO;
 
-  image.after(replacement);
+  image.after(wrapper);
   image.classList.add(LOGO_ORIGINAL_CLASS);
 }
 
@@ -1638,7 +1667,7 @@ function restoreBottomMenuCustomIconReplacements() {
     host.classList.remove(BOOKMARK_ICON_HOST_CLASS);
   });
 
-  document.querySelectorAll(`img.${CHAPTERS_ICON_CLASS}, img.${BOOKMARK_ICON_CLASS}`).forEach((replacement) => {
+  document.querySelectorAll(`svg.${CHAPTERS_ICON_CLASS}, svg.${BOOKMARK_ICON_CLASS}, svg.audible-tools-detail-icon, svg.audible-tools-library-icon`).forEach((replacement) => {
     replacement.remove();
   });
 
@@ -1654,9 +1683,7 @@ function restoreBottomMenuCustomIconReplacements() {
   });
 }
 
-function applyBottomMenuCustomIcon(menuItems, isTargetControl, hostClass, replacementClass, assetPath, labelPattern) {
-  const iconUrl = getRuntimeAssetUrl(assetPath);
-  if (!iconUrl) return;
+function applyBottomMenuCustomIcon(menuItems, isTargetControl, hostClass, replacementClass, svgMarkup, labelPattern) {
   menuItems.forEach((item) => {
     if (!isTargetControl(item)) return;
 
@@ -1681,29 +1708,29 @@ function applyBottomMenuCustomIcon(menuItems, isTargetControl, hostClass, replac
       iconElement.classList.add(CHAPTERS_ICON_ORIGINAL_HIDDEN_CLASS);
     });
 
-    const replacement = document.createElement("img");
-    replacement.className = replacementClass;
-    replacement.setAttribute("src", iconUrl);
-    replacement.setAttribute("alt", "");
-    replacement.setAttribute("aria-hidden", "true");
+    if (item.querySelector(`.` + replacementClass)) return;
 
+    const wrapper = document.createElement("span");
+    wrapper.className = "audible-tools-injected-svg-wrapper";
+    wrapper.style.display = "inline-flex";
+    wrapper.innerHTML = svgMarkup;
+    
+    const svgElement = wrapper.firstElementChild;
+    
     const firstContentChild = item.firstElementChild;
     if (firstContentChild) {
-      item.insertBefore(replacement, firstContentChild);
+      item.insertBefore(svgElement, firstContentChild);
       return;
     }
 
-    item.appendChild(replacement);
+    item.appendChild(svgElement);
   });
 }
 
 const DETAIL_ICON_ASSET_PATH = "assets/detail.svg";
 const LIBRARY_ICON_ASSET_PATH = "assets/library.svg";
 
-function applyDrawerCustomIcon(selector, replacementClass, assetPath) {
-  const iconUrl = getRuntimeAssetUrl(assetPath);
-  if (!iconUrl) return;
-
+function applyDrawerCustomIcon(selector, replacementClass, svgMarkup) {
   document.querySelectorAll(selector).forEach((item) => {
     // Only apply if looking at a drawer item container that has the icon inside
     const iconContainer = item.querySelector('.bc-icon');
@@ -1723,24 +1750,22 @@ function applyDrawerCustomIcon(selector, replacementClass, assetPath) {
     // Prevent adding multiple times
     if (item.querySelector(`.` + replacementClass)) return;
 
-    // Create custom SVG img tag
-    const replacement = document.createElement("img");
-    replacement.className = replacementClass + " audible-tools-drawer-icon";
-    replacement.setAttribute("src", iconUrl);
-    replacement.setAttribute("alt", "");
-    replacement.setAttribute("aria-hidden", "true");
+    const wrapper = document.createElement("span");
+    wrapper.innerHTML = svgMarkup;
+    const svgElement = wrapper.firstElementChild;
+    svgElement.classList.add(replacementClass);
     
     // Insert where the old icon was
-    iconContainer.parentNode.insertBefore(replacement, iconContainer);
+    iconContainer.parentNode.insertBefore(svgElement, iconContainer);
   });
 }
 
 function syncDrawerCustomIcons() {
   if (currentSettings.theme === "original") return;
 
-  applyDrawerCustomIcon('.adblCpTitleDetail', 'audible-tools-detail-icon', DETAIL_ICON_ASSET_PATH);
-  applyDrawerCustomIcon('.adblManageInLibrary, .adblAddToLibrary', 'audible-tools-library-icon', LIBRARY_ICON_ASSET_PATH);
-  applyDrawerCustomIcon('.adblCPMenuClipsBookmarksTray', BOOKMARK_ICON_CLASS, BOOKMARK_ICON_ASSET_PATH);
+  applyDrawerCustomIcon('.adblCpTitleDetail', 'audible-tools-detail-icon', SVG_DETAIL);
+  applyDrawerCustomIcon('.adblManageInLibrary, .adblAddToLibrary', 'audible-tools-library-icon', SVG_LIBRARY);
+  applyDrawerCustomIcon('.adblCPMenuClipsBookmarksTray', BOOKMARK_ICON_CLASS, SVG_BOOKMARK);
 }
 
 function syncBottomMenuCustomIcons() {
@@ -1756,7 +1781,7 @@ function syncBottomMenuCustomIcons() {
     isBottomMenuChapterControl,
     CHAPTERS_ICON_HOST_CLASS,
     CHAPTERS_ICON_CLASS,
-    CHAPTERS_ICON_ASSET_PATH,
+    SVG_CHAPTERS,
     /(capitul|chapter)/
   );
   applyBottomMenuCustomIcon(
@@ -1764,7 +1789,7 @@ function syncBottomMenuCustomIcons() {
     isBottomMenuBookmarkControl,
     BOOKMARK_ICON_HOST_CLASS,
     BOOKMARK_ICON_CLASS,
-    BOOKMARK_ICON_ASSET_PATH,
+    SVG_BOOKMARK,
     /(marcador|bookmark|adicionar um marcador|add bookmark)/
   );
 
@@ -2311,11 +2336,11 @@ function applyDarkModeToPage(theme, customTheme) {
       // or we can just map them to surface
       document.documentElement.style.setProperty("--audible-tools-surface-raised", customTheme.surface);
       document.documentElement.style.setProperty("--audible-tools-surface-strong", customTheme.surface);
-      document.documentElement.style.setProperty("--audible-tools-border", customTheme.border);
+      document.documentElement.style.setProperty("--audible-tools-border", "transparent");
       document.documentElement.style.setProperty("--audible-tools-copy", customTheme.copy);
       // Muted text gets same color but relies on opacity or we just use copy
       document.documentElement.style.setProperty("--audible-tools-muted", customTheme.copy);
-      document.documentElement.style.setProperty("--audible-tools-icon", customTheme.icon);
+      document.documentElement.style.setProperty("--audible-tools-icon", customTheme.copy);
     } else {
       // Remove inline styles to fall back to the stylesheet defaults (for "dark" theme)
       document.documentElement.style.removeProperty("--audible-tools-bg");
@@ -2508,7 +2533,7 @@ function applySettings(incoming) {
   currentSettings = normalizeSettings(incoming);
 
   if (!isSupportedWebplayerUrl(window.location.href)) {
-    applyDarkModeToPage(false);
+    applyDarkModeToPage("original");
     clearIconControlStyling();
     removeCustomLogoReplacements();
     removeVolumeWidget();
