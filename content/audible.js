@@ -807,9 +807,21 @@ html.${DARK_MODE_CLASS} .bc-core-actionsheet-cancel .bc-button {
 }
 
 /* Fix Bookmark missing hover underline (Audible omitted the <a> tag) */
-html.${DARK_MODE_CLASS} .adblCPMenuClipsBookmarksTray:hover .bc-size-action-large {
+html.${DARK_MODE_CLASS} .adblCPMenuClipsBookmarksTray:hover .bc-size-action-large,
+html.${DARK_MODE_CLASS} .adblAddToLibrary:hover .bc-size-action-large {
   text-decoration: underline !important;
   cursor: pointer !important;
+}
+
+/* Sizing for injected Drawer Custom Icons */
+html.${DARK_MODE_CLASS} .audible-tools-drawer-icon {
+  display: inline-block !important;
+  width: 24px !important;
+  height: 24px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  margin-right: -4px !important;
+  vertical-align: middle !important;
 }
 
 html.${DARK_MODE_CLASS} .${CHAPTER_PANEL_HOST_CLASS} {
@@ -1678,6 +1690,52 @@ function applyBottomMenuCustomIcon(menuItems, isTargetControl, hostClass, replac
   });
 }
 
+const DETAIL_ICON_ASSET_PATH = "assets/detail.svg";
+const LIBRARY_ICON_ASSET_PATH = "assets/library.svg";
+
+function applyDrawerCustomIcon(selector, replacementClass, assetPath) {
+  const iconUrl = getRuntimeAssetUrl(assetPath);
+  if (!iconUrl) return;
+
+  document.querySelectorAll(selector).forEach((item) => {
+    // Only apply if looking at a drawer item container that has the icon inside
+    const iconContainer = item.querySelector('.bc-icon');
+    if (!iconContainer) return;
+
+    // Hide original icon
+    if (!iconContainer.hasAttribute(CHAPTERS_ICON_ORIGINAL_DISPLAY_ATTRIBUTE)) {
+      const originalDisplay = iconContainer.style.display;
+      iconContainer.setAttribute(
+        CHAPTERS_ICON_ORIGINAL_DISPLAY_ATTRIBUTE,
+        originalDisplay ? originalDisplay : "__none__"
+      );
+    }
+    iconContainer.style.display = "none";
+    iconContainer.classList.add(CHAPTERS_ICON_ORIGINAL_HIDDEN_CLASS);
+
+    // Prevent adding multiple times
+    if (item.querySelector(`.` + replacementClass)) return;
+
+    // Create custom SVG img tag
+    const replacement = document.createElement("img");
+    replacement.className = replacementClass + " audible-tools-drawer-icon";
+    replacement.setAttribute("src", iconUrl);
+    replacement.setAttribute("alt", "");
+    replacement.setAttribute("aria-hidden", "true");
+    
+    // Insert where the old icon was
+    iconContainer.parentNode.insertBefore(replacement, iconContainer);
+  });
+}
+
+function syncDrawerCustomIcons() {
+  if (!currentSettings.darkTheme) return;
+
+  applyDrawerCustomIcon('.adblCpTitleDetail', 'audible-tools-detail-icon', DETAIL_ICON_ASSET_PATH);
+  applyDrawerCustomIcon('.adblManageInLibrary, .adblAddToLibrary', 'audible-tools-library-icon', LIBRARY_ICON_ASSET_PATH);
+  applyDrawerCustomIcon('.adblCPMenuClipsBookmarksTray', BOOKMARK_ICON_CLASS, BOOKMARK_ICON_ASSET_PATH);
+}
+
 function syncBottomMenuCustomIcons() {
   restoreBottomMenuCustomIconReplacements();
   if (!currentSettings.darkTheme) return;
@@ -1704,6 +1762,7 @@ function syncBottomMenuCustomIcons() {
   );
 
   syncBottomMenuCardClickTargets();
+  syncDrawerCustomIcons();
 }
 
 function clearIconControlStyling() {
