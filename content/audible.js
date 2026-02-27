@@ -1741,6 +1741,7 @@ function applyDrawerCustomIcon(selector, replacementClass, svgMarkup) {
     wrapper.innerHTML = svgMarkup;
     const svgElement = wrapper.firstElementChild;
     svgElement.classList.add(replacementClass);
+    svgElement.classList.add("audible-tools-drawer-icon");
     
     // Insert where the old icon was
     iconContainer.parentNode.insertBefore(svgElement, iconContainer);
