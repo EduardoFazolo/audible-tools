@@ -4,7 +4,7 @@ const DEFAULT_SETTINGS = {
   customTheme: {
     bg: "#10131a",
     surface: "#1d2230",
-    copy: "#e7eaf1"
+    copy: "#f79a1c"
   },
   volumeBoost: 100,
   playbackSpeed: 1
@@ -73,7 +73,8 @@ const VOLUME_WIDGET_STYLES = `
   display: flex;
   align-items: center;
   gap: 12px;
-  width: min(520px, calc(100vw - 44px));
+  width: 100%;
+  max-width: 520px;
   margin: 4px auto 8px;
   padding: 0;
   border: 0 !important;
@@ -88,6 +89,7 @@ const VOLUME_WIDGET_STYLES = `
   position: fixed;
   left: 50%;
   bottom: 98px;
+  width: min(520px, calc(100vw - 44px));
   transform: translateX(-50%);
   margin: 0 auto;
   padding: 8px 12px;
@@ -200,10 +202,10 @@ const VOLUME_WIDGET_STYLES = `
 @media (max-width: 640px) {
   #${VOLUME_WIDGET_ID}[data-layout="floating"] {
     bottom: 86px;
+    width: min(520px, calc(100vw - 28px));
   }
 
   #${VOLUME_WIDGET_ID} {
-    width: min(520px, calc(100vw - 28px));
     gap: 10px;
   }
 }
@@ -402,7 +404,7 @@ html.${DARK_MODE_CLASS} {
   --audible-tools-surface-raised: #242b3a;
   --audible-tools-surface-strong: #2b3344;
   --audible-tools-border: transparent;
-  --audible-tools-copy: #e7eaf1;
+  --audible-tools-copy: #f79a1c;
   --audible-tools-muted: #a2a9b8;
   --audible-tools-icon: var(--audible-tools-copy);
   --audible-tools-focus: rgba(255, 161, 0, 0.34);
@@ -482,7 +484,7 @@ html.${DARK_MODE_CLASS} :where(
   color: var(--audible-tools-copy) !important;
 }
 
-html.${DARK_MODE_CLASS} :where(button, [role="button"], a[role="button"], input, textarea, select) {
+html.${DARK_MODE_CLASS} :where(button, [role="button"], a[role="button"], input:not([type="range"]), textarea, select) {
   background-color: var(--audible-tools-surface-raised) !important;
   color: var(--audible-tools-copy) !important;
   border-color: var(--audible-tools-border) !important;
@@ -514,22 +516,7 @@ html.${DARK_MODE_CLASS} :where(progress, meter) {
   accent-color: var(--audible-tools-accent) !important;
 }
 
-html.${DARK_MODE_CLASS} :where(
-  [id*="slider" i],
-  [class*="slider" i],
-  [id*="progress" i],
-  [class*="progress" i],
-  [id*="seek" i],
-  [class*="seek" i],
-  [id*="scrubber" i],
-  [class*="scrubber" i]
-) {
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-}
+
 
 html.${DARK_MODE_CLASS} :where(hr) {
   border-color: var(--audible-tools-border) !important;

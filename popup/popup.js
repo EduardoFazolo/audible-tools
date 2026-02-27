@@ -4,7 +4,7 @@ const DEFAULT_SETTINGS = {
   customTheme: {
     bg: "#10131a",
     surface: "#1d2230",
-    copy: "#e7eaf1"
+    copy: "#f79a1c"
   },
   volumeBoost: 100,
   playbackSpeed: 1
