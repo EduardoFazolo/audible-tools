@@ -1,6 +1,13 @@
 const DEFAULT_SETTINGS = {
   openInNewTab: false,
-  darkTheme: false,
+  theme: "original", // "original", "dark", or "custom"
+  customTheme: {
+    bg: "#10131a",
+    surface: "#1d2230",
+    border: "#333d4f",
+    copy: "#e7eaf1",
+    icon: "#ffa100"
+  },
   volumeBoost: 100,
   playbackSpeed: 1
 };

@@ -189,6 +189,105 @@ body[data-theme="dark"] .switch input:checked + .slider {
   transform: translateX(20px);
 }
 
+.theme-picker {
+  display: flex;
+  gap: 8px;
+  padding: 0 8px 12px;
+}
+
+.theme-option {
+  flex: 1;
+  position: relative;
+  cursor: pointer;
+}
+
+.theme-option input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.theme-label {
+  display: block;
+  text-align: center;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text-muted);
+  transition: all 180ms ease;
+  user-select: none;
+}
+
+.theme-option input:checked + .theme-label {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--brand-300), var(--brand-600));
+}
+
+body[data-theme="dark"] .theme-option input:checked + .theme-label {
+  background: linear-gradient(135deg, var(--dark-accent), var(--dark-accent-deep));
+}
+
+.custom-theme-panel {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 300ms ease, opacity 300ms ease, margin 300ms ease, padding 300ms ease;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  border: 1px solid transparent;
+  margin: 0 8px;
+}
+
+body[data-theme="dark"] .custom-theme-panel {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.custom-theme-panel.expanded {
+  max-height: 250px;
+  opacity: 1;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-color: var(--border);
+}
+
+.color-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 4px;
+}
+
+.color-row label {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.color-input-wrapper {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.color-input-wrapper input[type="color"] {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  background: none;
+}
+
 .volume-card {
   margin-top: 6px;
   border-radius: 12px;

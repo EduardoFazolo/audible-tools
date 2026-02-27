@@ -1,6 +1,13 @@
 const DEFAULT_SETTINGS = {
   openInNewTab: false,
-  darkTheme: false,
+  theme: "original", // "original", "dark", or "custom"
+  customTheme: {
+    bg: "#10131a",
+    surface: "#1d2230",
+    border: "#333d4f",
+    copy: "#e7eaf1",
+    icon: "#ffa100"
+  },
   volumeBoost: 100,
   playbackSpeed: 1
 };
@@ -1369,7 +1376,7 @@ function replaceTopLogoImage(image) {
 }
 
 function applyTopLogoReplacement(root = document) {
-  if (!currentSettings.darkTheme) return;
+  if (currentSettings.theme === "original") return;
 
   const candidates = collectImages(root);
   candidates.forEach((image) => {
@@ -1482,7 +1489,7 @@ function bindBottomMenuCardClick(card) {
 }
 
 function syncBottomMenuCardClickTargets() {
-  if (!currentSettings.darkTheme) return;
+  if (currentSettings.theme === "original") return;
 
   const menu = document.getElementById("adbl-cloud-player-bottom-menu-area");
   if (!(menu instanceof Element)) return;
@@ -1555,7 +1562,7 @@ function clearChapterPanelThemeClasses() {
 
 function syncChapterPanelTheme() {
   clearChapterPanelThemeClasses();
-  if (!currentSettings.darkTheme) return;
+  if (currentSettings.theme === "original") return;
 
   const textCandidates = Array.from(
     document.querySelectorAll("span, p, div, h1, h2, h3, h4, h5, h6, button, a, li")
@@ -1729,7 +1736,7 @@ function applyDrawerCustomIcon(selector, replacementClass, assetPath) {
 }
 
 function syncDrawerCustomIcons() {
-  if (!currentSettings.darkTheme) return;
+  if (currentSettings.theme === "original") return;
 
   applyDrawerCustomIcon('.adblCpTitleDetail', 'audible-tools-detail-icon', DETAIL_ICON_ASSET_PATH);
   applyDrawerCustomIcon('.adblManageInLibrary, .adblAddToLibrary', 'audible-tools-library-icon', LIBRARY_ICON_ASSET_PATH);
@@ -1738,7 +1745,7 @@ function syncDrawerCustomIcons() {
 
 function syncBottomMenuCustomIcons() {
   restoreBottomMenuCustomIconReplacements();
-  if (!currentSettings.darkTheme) return;
+  if (currentSettings.theme === "original") return;
 
   const menu = document.getElementById("adbl-cloud-player-bottom-menu-area");
   if (!(menu instanceof Element)) return;
@@ -1804,7 +1811,7 @@ function styleIconControls(root = document) {
 
     candidate.classList.toggle(
       TEXT_ACCENT_CLASS,
-      Boolean(currentSettings.darkTheme && shouldUseTextAccent(candidate))
+      Boolean(currentSettings.theme !== "original" && shouldUseTextAccent(candidate))
     );
 
     if (isIconLikeControl(candidate)) {
@@ -1819,7 +1826,7 @@ function styleIconControls(root = document) {
   syncBottomMenuSpeedLabel();
   syncChapterPanelTheme();
 
-  if (!currentSettings.darkTheme) return;
+  if (currentSettings.theme === "original") return;
 
   const transportIconMap = buildTransportIconMap(candidates);
   candidates.forEach((candidate) => {
@@ -1830,7 +1837,7 @@ function styleIconControls(root = document) {
 }
 
 function scheduleIconRefresh() {
-  if (!currentSettings.darkTheme || iconRefreshPending) return;
+  if (currentSettings.theme === "original" || iconRefreshPending) return;
 
   iconRefreshPending = true;
   requestAnimationFrame(() => {
@@ -1993,7 +2000,7 @@ function syncSpeedPopoverUi() {
 
   const speed = normalizePlaybackSpeed(currentSettings.playbackSpeed);
   const rangePercent = Math.round(((speed - PLAYBACK_SPEED_MIN) / (PLAYBACK_SPEED_MAX - PLAYBACK_SPEED_MIN)) * 100);
-  parts.popover.dataset.theme = currentSettings.darkTheme ? "dark" : "light";
+  parts.popover.dataset.theme = currentSettings.theme === "original" ? "light" : "dark";
   parts.range.value = String(Math.round(speed * 100));
   parts.range.style.setProperty("--value", `${rangePercent}%`);
   parts.range.setAttribute("aria-valuetext", formatPlaybackSpeed(speed));
@@ -2266,7 +2273,7 @@ function syncVolumeWidget() {
   const widgetParts = getVolumeWidgetParts();
   if (!widgetParts) return;
 
-  widgetParts.widget.dataset.theme = currentSettings.darkTheme ? "dark" : "light";
+  widgetParts.widget.dataset.theme = currentSettings.theme === "original" ? "light" : "dark";
   const normalized = normalizeVolumeBoost(currentSettings.volumeBoost);
   widgetParts.slider.value = String(normalized);
   syncVolumeSliderVisual(widgetParts.slider, normalized);
@@ -2288,16 +2295,52 @@ function ensureDarkModeStyles() {
   document.documentElement.appendChild(styleTag);
 }
 
-function applyDarkModeToPage(isDarkModeEnabled) {
+function applyDarkModeToPage(theme, customTheme) {
   if (!document.documentElement) return;
 
-  if (isDarkModeEnabled) {
+  if (theme !== "original") {
     ensureDarkModeStyles();
     document.documentElement.classList.add(DARK_MODE_CLASS);
+    
+    if (theme === "custom" && customTheme) {
+      document.documentElement.style.setProperty("--audible-tools-bg", customTheme.bg);
+      // We also update the elevated bg to match bg
+      document.documentElement.style.setProperty("--audible-tools-bg-elevated", customTheme.bg);
+      document.documentElement.style.setProperty("--audible-tools-surface", customTheme.surface);
+      // Raised/strong surfaces derive from surface in custom mode for simplicity, 
+      // or we can just map them to surface
+      document.documentElement.style.setProperty("--audible-tools-surface-raised", customTheme.surface);
+      document.documentElement.style.setProperty("--audible-tools-surface-strong", customTheme.surface);
+      document.documentElement.style.setProperty("--audible-tools-border", customTheme.border);
+      document.documentElement.style.setProperty("--audible-tools-copy", customTheme.copy);
+      // Muted text gets same color but relies on opacity or we just use copy
+      document.documentElement.style.setProperty("--audible-tools-muted", customTheme.copy);
+      document.documentElement.style.setProperty("--audible-tools-icon", customTheme.icon);
+    } else {
+      // Remove inline styles to fall back to the stylesheet defaults (for "dark" theme)
+      document.documentElement.style.removeProperty("--audible-tools-bg");
+      document.documentElement.style.removeProperty("--audible-tools-bg-elevated");
+      document.documentElement.style.removeProperty("--audible-tools-surface");
+      document.documentElement.style.removeProperty("--audible-tools-surface-raised");
+      document.documentElement.style.removeProperty("--audible-tools-surface-strong");
+      document.documentElement.style.removeProperty("--audible-tools-border");
+      document.documentElement.style.removeProperty("--audible-tools-copy");
+      document.documentElement.style.removeProperty("--audible-tools-muted");
+      document.documentElement.style.removeProperty("--audible-tools-icon");
+    }
     return;
   }
 
   document.documentElement.classList.remove(DARK_MODE_CLASS);
+  document.documentElement.style.removeProperty("--audible-tools-bg");
+  document.documentElement.style.removeProperty("--audible-tools-bg-elevated");
+  document.documentElement.style.removeProperty("--audible-tools-surface");
+  document.documentElement.style.removeProperty("--audible-tools-surface-raised");
+  document.documentElement.style.removeProperty("--audible-tools-surface-strong");
+  document.documentElement.style.removeProperty("--audible-tools-border");
+  document.documentElement.style.removeProperty("--audible-tools-copy");
+  document.documentElement.style.removeProperty("--audible-tools-muted");
+  document.documentElement.style.removeProperty("--audible-tools-icon");
 }
 
 function ensureAudioContext() {
@@ -2368,7 +2411,7 @@ function attachMediaWatch(mediaElement) {
   const enforceVolume = () => {
     applyVolumeToMedia(mediaElement);
     applyPlaybackSpeedToMedia(mediaElement);
-    if (currentSettings.darkTheme) {
+    if (currentSettings.theme !== "original") {
       scheduleIconRefresh();
     }
   };
@@ -2420,10 +2463,10 @@ function startMediaObserver() {
       }
     });
 
-    if (currentSettings.darkTheme && shouldRefreshIcons) {
+    if (currentSettings.theme !== "original" && shouldRefreshIcons) {
       scheduleIconRefresh();
     }
-    if (currentSettings.darkTheme && shouldRefreshLogo) {
+    if (currentSettings.theme !== "original" && shouldRefreshLogo) {
       applyTopLogoReplacement(document);
     }
   });
@@ -2442,10 +2485,14 @@ function normalizeSettings(incoming) {
       typeof incoming.openInNewTab === "boolean"
         ? incoming.openInNewTab
         : currentSettings.openInNewTab,
-    darkTheme:
-      typeof incoming.darkTheme === "boolean"
-        ? incoming.darkTheme
-        : currentSettings.darkTheme,
+    theme:
+      typeof incoming.theme === "string"
+        ? incoming.theme
+        : currentSettings.theme,
+    customTheme:
+      typeof incoming.customTheme === "object" && incoming.customTheme !== null
+        ? { ...currentSettings.customTheme, ...incoming.customTheme }
+        : currentSettings.customTheme,
     volumeBoost:
       incoming.volumeBoost !== undefined
         ? normalizeVolumeBoost(incoming.volumeBoost)
@@ -2475,8 +2522,8 @@ function applySettings(incoming) {
   ensureVolumeWidget();
   syncVolumeWidget();
   applyVolumeBoost(currentSettings.volumeBoost);
-  applyDarkModeToPage(currentSettings.darkTheme);
-  if (currentSettings.darkTheme) {
+  applyDarkModeToPage(currentSettings.theme, currentSettings.customTheme);
+  if (currentSettings.theme !== "original") {
     styleIconControls(document);
     scheduleIconRefresh();
     applyTopLogoReplacement(document);
@@ -2665,7 +2712,7 @@ function handleSpeedPopoverViewportChange() {
 
 function handleDocumentClick(event) {
   const isWebplayerPage = isSupportedWebplayerUrl(window.location.href);
-  if (isWebplayerPage && currentSettings.darkTheme) {
+  if (isWebplayerPage && currentSettings.theme !== "original") {
     scheduleIconRefresh();
   }
 
@@ -2714,7 +2761,8 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 
   const nextSettings = {};
   if (changes.openInNewTab) nextSettings.openInNewTab = changes.openInNewTab.newValue;
-  if (changes.darkTheme) nextSettings.darkTheme = changes.darkTheme.newValue;
+  if (changes.theme) nextSettings.theme = changes.theme.newValue;
+  if (changes.customTheme) nextSettings.customTheme = changes.customTheme.newValue;
   if (changes.volumeBoost) nextSettings.volumeBoost = changes.volumeBoost.newValue;
   if (changes.playbackSpeed) nextSettings.playbackSpeed = changes.playbackSpeed.newValue;
 
