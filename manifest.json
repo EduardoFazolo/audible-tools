@@ -3,16 +3,37 @@
   "name": "Audible Tools",
   "description": "Utility controls for Audible with persistent settings and in-page volume boost.",
   "version": "1.0.0",
+  "icons": {
+    "16": "icon/icon16.png",
+    "32": "icon/icon32.png",
+    "48": "icon/icon48.png",
+    "128": "icon/icon128.png"
+  },
   "permissions": [
     "storage",
     "tabs"
   ],
   "host_permissions": [
-    "https://*/*"
+    "https://*.audible.com/*",
+    "https://*.audible.co.uk/*",
+    "https://*.audible.de/*",
+    "https://*.audible.fr/*",
+    "https://*.audible.com.au/*",
+    "https://*.audible.in/*",
+    "https://*.audible.ca/*",
+    "https://*.audible.co.jp/*",
+    "https://*.audible.it/*",
+    "https://*.audible.es/*"
   ],
   "action": {
     "default_title": "Audible Tools",
-    "default_popup": "popup/popup.html"
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icon/icon16.png",
+      "32": "icon/icon32.png",
+      "48": "icon/icon48.png",
+      "128": "icon/icon128.png"
+    }
   },
   "background": {
     "service_worker": "background.js"
@@ -20,7 +41,16 @@
   "content_scripts": [
     {
       "matches": [
-        "https://*/*"
+        "https://*.audible.com/*",
+        "https://*.audible.co.uk/*",
+        "https://*.audible.de/*",
+        "https://*.audible.fr/*",
+        "https://*.audible.com.au/*",
+        "https://*.audible.in/*",
+        "https://*.audible.ca/*",
+        "https://*.audible.co.jp/*",
+        "https://*.audible.it/*",
+        "https://*.audible.es/*"
       ],
       "js": [
         "content/audible.js"
@@ -34,7 +64,16 @@
         "assets/*.svg"
       ],
       "matches": [
-        "https://*/*"
+        "https://*.audible.com/*",
+        "https://*.audible.co.uk/*",
+        "https://*.audible.de/*",
+        "https://*.audible.fr/*",
+        "https://*.audible.com.au/*",
+        "https://*.audible.in/*",
+        "https://*.audible.ca/*",
+        "https://*.audible.co.jp/*",
+        "https://*.audible.it/*",
+        "https://*.audible.es/*"
       ]
     }
   ]

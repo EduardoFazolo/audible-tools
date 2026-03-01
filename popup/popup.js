@@ -1,12 +1,23 @@
 const DEFAULT_SETTINGS = {
   openInNewTab: false,
-  darkTheme: false,
+  theme: "original", // "original", "dark", or "custom"
+  customTheme: {
+    bg: "#10131a",
+    surface: "#1d2230",
+    copy: "#f79a1c"
+  },
   volumeBoost: 100,
   playbackSpeed: 1
 };
 
 const openInNewTabInput = document.getElementById("openInNewTab");
-const darkThemeInput = document.getElementById("darkTheme");
+const themeInputs = document.querySelectorAll('input[name="theme"]');
+const customThemePanel = document.getElementById("customThemePanel");
+const colorInputs = {
+  bg: document.getElementById("colorBg"),
+  surface: document.getElementById("colorSurface"),
+  copy: document.getElementById("colorCopy")
+};
 const volumeBoostInput = document.getElementById("volumeBoost");
 const volumeValueOutput = document.getElementById("volumeValue");
 
@@ -27,7 +38,7 @@ function setStoredSettings(nextSettings) {
 }
 
 function updateTheme() {
-  document.body.dataset.theme = settings.darkTheme ? "dark" : "light";
+  document.body.dataset.theme = settings.theme === "original" ? "light" : "dark";
 }
 
 function updateVolumeLabel() {
@@ -36,7 +47,23 @@ function updateVolumeLabel() {
 
 function syncInputsWithSettings() {
   openInNewTabInput.checked = settings.openInNewTab;
-  darkThemeInput.checked = settings.darkTheme;
+  
+  themeInputs.forEach(input => {
+    input.checked = input.value === settings.theme;
+  });
+  
+  if (settings.theme === "custom") {
+    customThemePanel.classList.add("expanded");
+  } else {
+    customThemePanel.classList.remove("expanded");
+  }
+
+  Object.entries(colorInputs).forEach(([key, input]) => {
+    if (input && settings.customTheme[key]) {
+      input.value = settings.customTheme[key];
+    }
+  });
+
   volumeBoostInput.value = String(settings.volumeBoost);
   updateTheme();
   updateVolumeLabel();
@@ -56,8 +83,21 @@ async function initialize() {
     await saveAndRender({ openInNewTab: event.target.checked });
   });
 
-  darkThemeInput.addEventListener("change", async (event) => {
-    await saveAndRender({ darkTheme: event.target.checked });
+  themeInputs.forEach(input => {
+    input.addEventListener("change", async (event) => {
+      await saveAndRender({ theme: event.target.value });
+    });
+  });
+
+  Object.entries(colorInputs).forEach(([key, input]) => {
+    if (input) {
+      const handleColorChange = async (event) => {
+        const newCustomTheme = { ...settings.customTheme, [key]: event.target.value };
+        await saveAndRender({ customTheme: newCustomTheme });
+      };
+      input.addEventListener("input", handleColorChange);
+      input.addEventListener("change", handleColorChange);
+    }
   });
 
   volumeBoostInput.addEventListener("input", async (event) => {
