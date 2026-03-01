@@ -3,6 +3,12 @@
   "name": "Audible Tools",
   "description": "Utility controls for Audible with persistent settings and in-page volume boost.",
   "version": "1.0.0",
+  "icons": {
+    "16": "icon/icon16.png",
+    "32": "icon/icon32.png",
+    "48": "icon/icon48.png",
+    "128": "icon/icon128.png"
+  },
   "permissions": [
     "storage",
     "tabs"
@@ -12,7 +18,13 @@
   ],
   "action": {
     "default_title": "Audible Tools",
-    "default_popup": "popup/popup.html"
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icon/icon16.png",
+      "32": "icon/icon32.png",
+      "48": "icon/icon48.png",
+      "128": "icon/icon128.png"
+    }
   },
   "background": {
     "service_worker": "background.js"
