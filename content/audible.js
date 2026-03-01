@@ -74,7 +74,7 @@ const VOLUME_WIDGET_STYLES = `
   align-items: center;
   gap: 12px;
   width: 100%;
-  max-width: 520px;
+  max-width: 90%;
   margin: 4px auto 8px;
   padding: 0;
   border: 0 !important;
@@ -710,7 +710,7 @@ html.${DARK_MODE_CLASS} #adbl-cloud-player-bottom-menu-area > .${TEXT_ACCENT_CLA
   padding: 2px 2px !important;
   border: 1px solid var(--audible-tools-border) !important;
   border-radius: 8px !important;
-  background: linear-gradient(180deg, rgba(52, 63, 88, 0.86), rgba(36, 45, 63, 0.94)) !important;
+  background: var(--audible-tools-surface-raised) !important;
   box-shadow: 0 3px 7px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
   display: flex !important;
   flex-direction: column !important;
@@ -1757,8 +1757,10 @@ function syncDrawerCustomIcons() {
 }
 
 function syncBottomMenuCustomIcons() {
-  restoreBottomMenuCustomIconReplacements();
-  if (currentSettings.theme === "original") return;
+  if (currentSettings.theme === "original") {
+    restoreBottomMenuCustomIconReplacements();
+    return;
+  }
 
   const menu = document.getElementById("adbl-cloud-player-bottom-menu-area");
   if (!(menu instanceof Element)) return;
