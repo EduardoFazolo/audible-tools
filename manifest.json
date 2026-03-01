@@ -14,7 +14,16 @@
     "tabs"
   ],
   "host_permissions": [
-    "https://*/*"
+    "https://*.audible.com/*",
+    "https://*.audible.co.uk/*",
+    "https://*.audible.de/*",
+    "https://*.audible.fr/*",
+    "https://*.audible.com.au/*",
+    "https://*.audible.in/*",
+    "https://*.audible.ca/*",
+    "https://*.audible.co.jp/*",
+    "https://*.audible.it/*",
+    "https://*.audible.es/*"
   ],
   "action": {
     "default_title": "Audible Tools",
@@ -32,7 +41,16 @@
   "content_scripts": [
     {
       "matches": [
-        "https://*/*"
+        "https://*.audible.com/*",
+        "https://*.audible.co.uk/*",
+        "https://*.audible.de/*",
+        "https://*.audible.fr/*",
+        "https://*.audible.com.au/*",
+        "https://*.audible.in/*",
+        "https://*.audible.ca/*",
+        "https://*.audible.co.jp/*",
+        "https://*.audible.it/*",
+        "https://*.audible.es/*"
       ],
       "js": [
         "content/audible.js"
@@ -46,7 +64,16 @@
         "assets/*.svg"
       ],
       "matches": [
-        "https://*/*"
+        "https://*.audible.com/*",
+        "https://*.audible.co.uk/*",
+        "https://*.audible.de/*",
+        "https://*.audible.fr/*",
+        "https://*.audible.com.au/*",
+        "https://*.audible.in/*",
+        "https://*.audible.ca/*",
+        "https://*.audible.co.jp/*",
+        "https://*.audible.it/*",
+        "https://*.audible.es/*"
       ]
     }
   ]
