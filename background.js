@@ -10,7 +10,7 @@ const DEFAULT_SETTINGS = {
   playbackSpeed: 1
 };
 
-const WEBPLAYER_HOST_REGEX = /^www\.audible\.[a-z.]+$/i;
+const WEBPLAYER_HOST_REGEX = /(^|\.)audible\.(com|com\.br|co\.uk|de|fr|com\.au|in|ca|co\.jp|it|es)$/i;
 const WEBPLAYER_PATH = "/webplayer";
 
 function isSupportedWebplayerUrl(url) {

@@ -14,15 +14,27 @@
     "tabs"
   ],
   "host_permissions": [
+    "https://audible.com/*",
     "https://*.audible.com/*",
+    "https://audible.com.br/*",
+    "https://*.audible.com.br/*",
+    "https://audible.co.uk/*",
     "https://*.audible.co.uk/*",
+    "https://audible.de/*",
     "https://*.audible.de/*",
+    "https://audible.fr/*",
     "https://*.audible.fr/*",
+    "https://audible.com.au/*",
     "https://*.audible.com.au/*",
+    "https://audible.in/*",
     "https://*.audible.in/*",
+    "https://audible.ca/*",
     "https://*.audible.ca/*",
+    "https://audible.co.jp/*",
     "https://*.audible.co.jp/*",
+    "https://audible.it/*",
     "https://*.audible.it/*",
+    "https://audible.es/*",
     "https://*.audible.es/*"
   ],
   "action": {
@@ -41,15 +53,27 @@
   "content_scripts": [
     {
       "matches": [
+        "https://audible.com/*",
         "https://*.audible.com/*",
+        "https://audible.com.br/*",
+        "https://*.audible.com.br/*",
+        "https://audible.co.uk/*",
         "https://*.audible.co.uk/*",
+        "https://audible.de/*",
         "https://*.audible.de/*",
+        "https://audible.fr/*",
         "https://*.audible.fr/*",
+        "https://audible.com.au/*",
         "https://*.audible.com.au/*",
+        "https://audible.in/*",
         "https://*.audible.in/*",
+        "https://audible.ca/*",
         "https://*.audible.ca/*",
+        "https://audible.co.jp/*",
         "https://*.audible.co.jp/*",
+        "https://audible.it/*",
         "https://*.audible.it/*",
+        "https://audible.es/*",
         "https://*.audible.es/*"
       ],
       "js": [
@@ -64,15 +88,27 @@
         "assets/*.svg"
       ],
       "matches": [
+        "https://audible.com/*",
         "https://*.audible.com/*",
+        "https://audible.com.br/*",
+        "https://*.audible.com.br/*",
+        "https://audible.co.uk/*",
         "https://*.audible.co.uk/*",
+        "https://audible.de/*",
         "https://*.audible.de/*",
+        "https://audible.fr/*",
         "https://*.audible.fr/*",
+        "https://audible.com.au/*",
         "https://*.audible.com.au/*",
+        "https://audible.in/*",
         "https://*.audible.in/*",
+        "https://audible.ca/*",
         "https://*.audible.ca/*",
+        "https://audible.co.jp/*",
         "https://*.audible.co.jp/*",
+        "https://audible.it/*",
         "https://*.audible.it/*",
+        "https://audible.es/*",
         "https://*.audible.es/*"
       ]
     }

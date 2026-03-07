@@ -23,6 +23,32 @@ const volumeValueOutput = document.getElementById("volumeValue");
 
 let settings = { ...DEFAULT_SETTINGS };
 
+function hexToRgb(hex) {
+  const value = String(hex || "").trim();
+  const normalized = value.startsWith("#") ? value.slice(1) : value;
+  const expanded =
+    normalized.length === 3
+      ? normalized
+          .split("")
+          .map((token) => token + token)
+          .join("")
+      : normalized;
+
+  if (!/^[0-9a-f]{6}$/i.test(expanded)) return null;
+
+  return {
+    r: parseInt(expanded.slice(0, 2), 16),
+    g: parseInt(expanded.slice(2, 4), 16),
+    b: parseInt(expanded.slice(4, 6), 16)
+  };
+}
+
+function toRgba(hex, alpha) {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return "";
+  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+}
+
 function getStoredSettings() {
   return new Promise((resolve) => {
     chrome.storage.local.get(DEFAULT_SETTINGS, (stored) => {
@@ -39,6 +65,25 @@ function setStoredSettings(nextSettings) {
 
 function updateTheme() {
   document.body.dataset.theme = settings.theme === "original" ? "light" : "dark";
+  document.body.dataset.themeVariant = settings.theme;
+
+  const accent =
+    settings.theme === "custom"
+      ? settings.customTheme?.copy || DEFAULT_SETTINGS.customTheme.copy
+      : settings.theme === "dark"
+        ? "#ffa100"
+        : "#db7e0e";
+  const accentContrast =
+    settings.theme === "custom"
+      ? settings.customTheme?.bg || "#10131a"
+      : settings.theme === "dark"
+        ? "#10131a"
+        : "#ffffff";
+
+  document.body.style.setProperty("--theme-accent", accent);
+  document.body.style.setProperty("--theme-accent-soft", toRgba(accent, 0.2));
+  document.body.style.setProperty("--theme-accent-track", toRgba(accent, 0.34));
+  document.body.style.setProperty("--theme-accent-contrast", accentContrast);
 }
 
 function updateVolumeLabel() {

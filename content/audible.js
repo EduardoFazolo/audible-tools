@@ -10,7 +10,7 @@ const DEFAULT_SETTINGS = {
   playbackSpeed: 1
 };
 
-const WEBPLAYER_HOST_REGEX = /^www\.audible\.[a-z.]+$/i;
+const WEBPLAYER_HOST_REGEX = /(^|\.)audible\.(com|com\.br|co\.uk|de|fr|com\.au|in|ca|co\.jp|it|es)$/i;
 const WEBPLAYER_PATH = "/webplayer";
 const DARK_MODE_CLASS = "audible-tools-dark-mode";
 const DARK_MODE_STYLE_ID = "audible-tools-dark-mode-style";
@@ -50,6 +50,18 @@ const SVG_LOGO = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 24.5" 
 
 const PLAY_NOW_BUTTON_SELECTOR = '#adbl-buy-box-play-now-button, adbl-button[name="playButton"]';
 const DEFAULT_CONTENT_DELIVERY_TYPE = "SinglePartBook";
+const THEME_MUTATION_ROOT_SELECTOR = [
+  "#adbl-cloud-player-bottom-menu-area",
+  ".adblCPMenuDrawer",
+  ".adblCPMenuClipsBookmarksTray",
+  ".adblCpTitleDetail",
+  ".adblManageInLibrary",
+  ".adblAddToLibrary",
+  "header",
+  "nav",
+  "[role='banner']",
+  "[role='navigation']"
+].join(", ");
 const VOLUME_WIDGET_ID = "audible-tools-webplayer-volume";
 const VOLUME_WIDGET_STYLE_ID = "audible-tools-webplayer-volume-style";
 const VOLUME_WIDGET_SLIDER_CLASS = "audible-tools-webplayer-volume-slider";
@@ -212,6 +224,8 @@ const VOLUME_WIDGET_STYLES = `
 `;
 const SPEED_POPOVER_STYLES = `
 #${SPEED_POPOVER_ID} {
+  --audible-tools-speed-accent: var(--audible-tools-accent, #ffa100);
+  --audible-tools-speed-track: rgba(15, 23, 36, 0.28);
   position: fixed;
   top: 0;
   left: 0;
@@ -236,6 +250,7 @@ const SPEED_POPOVER_STYLES = `
   border-color: rgba(81, 96, 122, 0.72);
   background: rgba(18, 24, 36, 0.96) !important;
   color: #ecf1f8 !important;
+  --audible-tools-speed-track: rgba(236, 241, 248, 0.34);
 }
 
 #${SPEED_POPOVER_ID} * {
@@ -301,20 +316,20 @@ const SPEED_POPOVER_STYLES = `
   border-radius: 999px;
   background: linear-gradient(
     to right,
-    #ffa100 0%,
-    #ffa100 var(--value, 20%),
-    rgba(15, 23, 36, 0.28) var(--value, 20%),
-    rgba(15, 23, 36, 0.28) 100%
+    var(--audible-tools-speed-accent) 0%,
+    var(--audible-tools-speed-accent) var(--value, 20%),
+    var(--audible-tools-speed-track) var(--value, 20%),
+    var(--audible-tools-speed-track) 100%
   );
 }
 
 #${SPEED_POPOVER_ID}[data-theme="dark"] .${SPEED_POPOVER_RANGE_CLASS}::-webkit-slider-runnable-track {
   background: linear-gradient(
     to right,
-    #ffa100 0%,
-    #ffa100 var(--value, 20%),
-    rgba(236, 241, 248, 0.34) var(--value, 20%),
-    rgba(236, 241, 248, 0.34) 100%
+    var(--audible-tools-speed-accent) 0%,
+    var(--audible-tools-speed-accent) var(--value, 20%),
+    var(--audible-tools-speed-track) var(--value, 20%),
+    var(--audible-tools-speed-track) 100%
   );
 }
 
@@ -326,24 +341,24 @@ const SPEED_POPOVER_STYLES = `
   margin-top: -6px;
   border: 0;
   border-radius: 50%;
-  background: #ffa100;
+  background: var(--audible-tools-speed-accent);
 }
 
 #${SPEED_POPOVER_ID} .${SPEED_POPOVER_RANGE_CLASS}::-moz-range-track {
   height: 4px;
   border: 0;
   border-radius: 999px;
-  background: rgba(15, 23, 36, 0.28);
+  background: var(--audible-tools-speed-track);
 }
 
 #${SPEED_POPOVER_ID}[data-theme="dark"] .${SPEED_POPOVER_RANGE_CLASS}::-moz-range-track {
-  background: rgba(236, 241, 248, 0.34);
+  background: var(--audible-tools-speed-track);
 }
 
 #${SPEED_POPOVER_ID} .${SPEED_POPOVER_RANGE_CLASS}::-moz-range-progress {
   height: 4px;
   border-radius: 999px;
-  background: #ffa100;
+  background: var(--audible-tools-speed-accent);
 }
 
 #${SPEED_POPOVER_ID} .${SPEED_POPOVER_RANGE_CLASS}::-moz-range-thumb {
@@ -351,7 +366,7 @@ const SPEED_POPOVER_STYLES = `
   height: 16px;
   border: 0;
   border-radius: 50%;
-  background: #ffa100;
+  background: var(--audible-tools-speed-accent);
 }
 
 #${SPEED_POPOVER_ID} .audible-tools-speed-popover-presets {
@@ -382,9 +397,9 @@ const SPEED_POPOVER_STYLES = `
 }
 
 #${SPEED_POPOVER_ID} button.${SPEED_POPOVER_PRESET_CLASS}[aria-pressed="true"] {
-  border-color: #ffa100 !important;
-  background: rgba(255, 161, 0, 0.2) !important;
-  color: #ffa100 !important;
+  border-color: var(--audible-tools-speed-accent) !important;
+  background: color-mix(in srgb, var(--audible-tools-speed-accent) 20%, transparent) !important;
+  color: var(--audible-tools-speed-accent) !important;
 }
 `;
 const CONTROL_ICON_ASSET_PATHS = {
@@ -406,6 +421,7 @@ html.${DARK_MODE_CLASS} {
   --audible-tools-border: transparent;
   --audible-tools-copy: #f79a1c;
   --audible-tools-muted: #a2a9b8;
+  --audible-tools-accent: var(--audible-tools-copy);
   --audible-tools-icon: var(--audible-tools-copy);
   --audible-tools-focus: rgba(255, 161, 0, 0.34);
   background: var(--audible-tools-bg) !important;
@@ -514,6 +530,59 @@ html.${DARK_MODE_CLASS} :where(
 
 html.${DARK_MODE_CLASS} :where(progress, meter) {
   accent-color: var(--audible-tools-accent) !important;
+}
+
+html.${DARK_MODE_CLASS} input[type="range"]:not(.${VOLUME_WIDGET_SLIDER_CLASS}):not(.${SPEED_POPOVER_RANGE_CLASS}) {
+  accent-color: var(--audible-tools-accent) !important;
+}
+
+html.${DARK_MODE_CLASS} input[type="range"]:not(.${VOLUME_WIDGET_SLIDER_CLASS}):not(.${SPEED_POPOVER_RANGE_CLASS})::-webkit-slider-thumb {
+  background: var(--audible-tools-accent) !important;
+}
+
+html.${DARK_MODE_CLASS} input[type="range"]:not(.${VOLUME_WIDGET_SLIDER_CLASS}):not(.${SPEED_POPOVER_RANGE_CLASS})::-moz-range-thumb {
+  background: var(--audible-tools-accent) !important;
+  border-color: var(--audible-tools-accent) !important;
+}
+
+html.${DARK_MODE_CLASS} .bc-range {
+  background: transparent !important;
+  overflow: visible !important;
+}
+
+html.${DARK_MODE_CLASS} .bc-range .bc-range-progress {
+  background: var(--audible-tools-accent) !important;
+  border-radius: 999px !important;
+}
+
+html.${DARK_MODE_CLASS} .bc-range input[type="range"] {
+  background: transparent !important;
+  accent-color: var(--audible-tools-accent) !important;
+}
+
+html.${DARK_MODE_CLASS} .bc-range input[type="range"]::-webkit-slider-runnable-track {
+  background: transparent !important;
+}
+
+html.${DARK_MODE_CLASS} .bc-range input[type="range"]::-moz-range-track {
+  background: transparent !important;
+}
+
+html.${DARK_MODE_CLASS} .bc-range input[type="range"]::-webkit-slider-thumb {
+  background: var(--audible-tools-accent) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html.${DARK_MODE_CLASS} .bc-range input[type="range"]::-moz-range-thumb {
+  background: var(--audible-tools-accent) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html.${DARK_MODE_CLASS} .bc-range .dot {
+  background: var(--audible-tools-accent) !important;
+  border-color: var(--audible-tools-accent) !important;
 }
 
 
@@ -898,10 +967,12 @@ html.${DARK_MODE_CLASS} :where(button, [role="button"], a[role="button"]):focus-
 let currentSettings = { ...DEFAULT_SETTINGS };
 let audioContext = null;
 let iconRefreshPending = false;
+let mediaObserver = null;
 let speedPopoverAnchor = null;
 
 const connectedMedia = new WeakMap();
-const observedMedia = new WeakSet();
+const observedMedia = new WeakMap();
+const pendingMediaDisconnects = new WeakMap();
 const REPLACEABLE_ICON_TYPES = new Set([
   "menu",
   "previous",
@@ -935,6 +1006,32 @@ function isSupportedAudibleUrl(rawUrl) {
   } catch {
     return false;
   }
+}
+
+function hexToRgb(hex) {
+  const value = String(hex || "").trim();
+  const normalized = value.startsWith("#") ? value.slice(1) : value;
+  const expanded =
+    normalized.length === 3
+      ? normalized
+          .split("")
+          .map((token) => token + token)
+          .join("")
+      : normalized;
+
+  if (!/^[0-9a-f]{6}$/i.test(expanded)) return null;
+
+  return {
+    r: parseInt(expanded.slice(0, 2), 16),
+    g: parseInt(expanded.slice(2, 4), 16),
+    b: parseInt(expanded.slice(4, 6), 16)
+  };
+}
+
+function toAlphaColor(hex, alpha, fallback) {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return fallback;
+  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
 }
 
 function parseLinkUrl(link) {
@@ -1855,10 +1952,13 @@ function scheduleIconRefresh() {
   if (currentSettings.theme === "original" || iconRefreshPending) return;
 
   iconRefreshPending = true;
-  requestAnimationFrame(() => {
-    iconRefreshPending = false;
-    styleIconControls(document);
-  });
+  window.setTimeout(() => {
+    requestAnimationFrame(() => {
+      iconRefreshPending = false;
+      if (currentSettings.theme === "original") return;
+      styleIconControls(document);
+    });
+  }, 120);
 }
 
 function applyNewTabTarget(link) {
@@ -2009,13 +2109,44 @@ function removeSpeedPopover() {
   if (popover) popover.remove();
 }
 
+function getThemeAccentTokens() {
+  if (currentSettings.theme === "custom") {
+    const accent = currentSettings.customTheme?.copy || DEFAULT_SETTINGS.customTheme.copy;
+    return {
+      accent,
+      accentTrack: toAlphaColor(accent, 0.34, "rgba(238, 242, 248, 0.34)"),
+      copy: accent,
+      volumeTrack: toAlphaColor(accent, 0.28, "rgba(238, 242, 248, 0.28)")
+    };
+  }
+
+  if (currentSettings.theme === "dark") {
+    return {
+      accent: "#ffa100",
+      accentTrack: "rgba(236, 241, 248, 0.34)",
+      copy: "#eef2f8",
+      volumeTrack: "rgba(238, 242, 248, 0.28)"
+    };
+  }
+
+  return {
+    accent: "#ffa100",
+    accentTrack: "rgba(15, 23, 36, 0.28)",
+    copy: "#101723",
+    volumeTrack: "rgba(16, 23, 35, 0.22)"
+  };
+}
+
 function syncSpeedPopoverUi() {
   const parts = getSpeedPopoverParts();
   if (!parts) return;
 
   const speed = normalizePlaybackSpeed(currentSettings.playbackSpeed);
   const rangePercent = Math.round(((speed - PLAYBACK_SPEED_MIN) / (PLAYBACK_SPEED_MAX - PLAYBACK_SPEED_MIN)) * 100);
+  const tokens = getThemeAccentTokens();
   parts.popover.dataset.theme = currentSettings.theme === "original" ? "light" : "dark";
+  parts.popover.style.setProperty("--audible-tools-speed-accent", tokens.accent);
+  parts.popover.style.setProperty("--audible-tools-speed-track", tokens.accentTrack);
   parts.range.value = String(Math.round(speed * 100));
   parts.range.style.setProperty("--value", `${rangePercent}%`);
   parts.range.setAttribute("aria-valuetext", formatPlaybackSpeed(speed));
@@ -2288,7 +2419,12 @@ function syncVolumeWidget() {
   const widgetParts = getVolumeWidgetParts();
   if (!widgetParts) return;
 
+  const tokens = getThemeAccentTokens();
   widgetParts.widget.dataset.theme = currentSettings.theme === "original" ? "light" : "dark";
+  widgetParts.widget.style.setProperty("--audible-tools-volume-copy", tokens.copy);
+  widgetParts.widget.style.setProperty("--audible-tools-volume-track", tokens.volumeTrack);
+  widgetParts.widget.style.setProperty("--audible-tools-volume-track-active", tokens.accent);
+  widgetParts.widget.style.setProperty("--audible-tools-volume-thumb", tokens.accent);
   const normalized = normalizeVolumeBoost(currentSettings.volumeBoost);
   widgetParts.slider.value = String(normalized);
   syncVolumeSliderVisual(widgetParts.slider, normalized);
@@ -2330,7 +2466,12 @@ function applyDarkModeToPage(theme, customTheme) {
       document.documentElement.style.setProperty("--audible-tools-copy", customTheme.copy);
       // Muted text gets same color but relies on opacity or we just use copy
       document.documentElement.style.setProperty("--audible-tools-muted", customTheme.copy);
+      document.documentElement.style.setProperty("--audible-tools-accent", customTheme.copy);
       document.documentElement.style.setProperty("--audible-tools-icon", customTheme.copy);
+      document.documentElement.style.setProperty(
+        "--audible-tools-focus",
+        toAlphaColor(customTheme.copy, 0.34, "rgba(255, 161, 0, 0.34)")
+      );
     } else {
       // Remove inline styles to fall back to the stylesheet defaults (for "dark" theme)
       document.documentElement.style.removeProperty("--audible-tools-bg");
@@ -2341,7 +2482,9 @@ function applyDarkModeToPage(theme, customTheme) {
       document.documentElement.style.removeProperty("--audible-tools-border");
       document.documentElement.style.removeProperty("--audible-tools-copy");
       document.documentElement.style.removeProperty("--audible-tools-muted");
+      document.documentElement.style.removeProperty("--audible-tools-accent");
       document.documentElement.style.removeProperty("--audible-tools-icon");
+      document.documentElement.style.removeProperty("--audible-tools-focus");
     }
     return;
   }
@@ -2355,7 +2498,9 @@ function applyDarkModeToPage(theme, customTheme) {
   document.documentElement.style.removeProperty("--audible-tools-border");
   document.documentElement.style.removeProperty("--audible-tools-copy");
   document.documentElement.style.removeProperty("--audible-tools-muted");
+  document.documentElement.style.removeProperty("--audible-tools-accent");
   document.documentElement.style.removeProperty("--audible-tools-icon");
+  document.documentElement.style.removeProperty("--audible-tools-focus");
 }
 
 function ensureAudioContext() {
@@ -2379,24 +2524,89 @@ function resumeAudioContextIfNeeded() {
 }
 
 function connectMedia(mediaElement) {
-  if (connectedMedia.has(mediaElement)) {
-    return connectedMedia.get(mediaElement);
-  }
-
   const context = ensureAudioContext();
   if (!context) return null;
+
+  const existingConnection = connectedMedia.get(mediaElement);
+  if (existingConnection) {
+    if (!existingConnection.connected) {
+      try {
+        existingConnection.sourceNode.connect(existingConnection.gainNode);
+        existingConnection.gainNode.connect(context.destination);
+        existingConnection.connected = true;
+      } catch {
+        return null;
+      }
+    }
+
+    return existingConnection;
+  }
 
   try {
     const sourceNode = context.createMediaElementSource(mediaElement);
     const gainNode = context.createGain();
     sourceNode.connect(gainNode).connect(context.destination);
 
-    const connection = { gainNode };
+    const connection = { sourceNode, gainNode, connected: true };
     connectedMedia.set(mediaElement, connection);
     return connection;
   } catch {
     return null;
   }
+}
+
+function clearPendingMediaDisconnect(mediaElement) {
+  const timerId = pendingMediaDisconnects.get(mediaElement);
+  if (timerId === undefined) return;
+
+  window.clearTimeout(timerId);
+  pendingMediaDisconnects.delete(mediaElement);
+}
+
+function scheduleMediaDisconnect(mediaElement) {
+  if (!(mediaElement instanceof HTMLMediaElement)) return;
+  if (pendingMediaDisconnects.has(mediaElement)) return;
+
+  const timerId = window.setTimeout(() => {
+    pendingMediaDisconnects.delete(mediaElement);
+    if (mediaElement.isConnected) return;
+    disconnectMedia(mediaElement);
+  }, 0);
+
+  pendingMediaDisconnects.set(mediaElement, timerId);
+}
+
+function disconnectMedia(mediaElement) {
+  if (!(mediaElement instanceof HTMLMediaElement)) return;
+
+  clearPendingMediaDisconnect(mediaElement);
+
+  const watch = observedMedia.get(mediaElement);
+  if (watch?.enforceVolume) {
+    mediaElement.removeEventListener("play", watch.enforceVolume);
+    mediaElement.removeEventListener("pause", watch.enforceVolume);
+    mediaElement.removeEventListener("ended", watch.enforceVolume);
+    mediaElement.removeEventListener("loadedmetadata", watch.enforceVolume);
+    observedMedia.delete(mediaElement);
+  }
+
+  const connection = connectedMedia.get(mediaElement);
+  if (!connection) return;
+
+  try {
+    connection.sourceNode.disconnect();
+  } catch {
+    // The player can already detach nodes during re-renders.
+  }
+
+  try {
+    connection.gainNode.disconnect();
+  } catch {
+    // The player can already detach nodes during re-renders.
+  }
+
+  connection.connected = false;
+  connection.gainNode.gain.value = 1;
 }
 
 function applyVolumeToMedia(mediaElement) {
@@ -2420,8 +2630,8 @@ function applyVolumeToMedia(mediaElement) {
 }
 
 function attachMediaWatch(mediaElement) {
+  clearPendingMediaDisconnect(mediaElement);
   if (observedMedia.has(mediaElement)) return;
-  observedMedia.add(mediaElement);
 
   const enforceVolume = () => {
     applyVolumeToMedia(mediaElement);
@@ -2430,6 +2640,7 @@ function attachMediaWatch(mediaElement) {
       scheduleIconRefresh();
     }
   };
+  observedMedia.set(mediaElement, { enforceVolume });
   mediaElement.addEventListener("play", enforceVolume);
   mediaElement.addEventListener("pause", enforceVolume);
   mediaElement.addEventListener("ended", enforceVolume);
@@ -2445,8 +2656,54 @@ function collectAndApplyMedia(root = document) {
   });
 }
 
+function cleanupMediaInTree(root, { immediate = false } = {}) {
+  if (root instanceof HTMLMediaElement) {
+    if (immediate) {
+      disconnectMedia(root);
+    } else {
+      scheduleMediaDisconnect(root);
+    }
+    return;
+  }
+
+  if (!(root instanceof Element || root instanceof Document)) return;
+
+  root.querySelectorAll("audio, video").forEach((mediaElement) => {
+    if (immediate) {
+      disconnectMedia(mediaElement);
+    } else {
+      scheduleMediaDisconnect(mediaElement);
+    }
+  });
+}
+
+function isInjectedAudibleToolsElement(element) {
+  return Boolean(
+    element.closest(
+      `#${VOLUME_WIDGET_ID}, #${SPEED_POPOVER_ID}, .${ICON_OVERLAY_CLASS}, .${CUSTOM_ICON_CLASS}, .${LOGO_REPLACEMENT_CLASS}`
+    )
+  );
+}
+
+function hasRelevantThemeMutationTarget(element) {
+  if (!(element instanceof Element) || !element.isConnected) return false;
+  if (isInjectedAudibleToolsElement(element)) return false;
+  if (element.matches("audio, video, img")) return true;
+  if (element.closest(THEME_MUTATION_ROOT_SELECTOR)) return true;
+  return Boolean(element.querySelector(THEME_MUTATION_ROOT_SELECTOR) || element.querySelector("audio, video, img"));
+}
+
+function stopMediaObserver() {
+  if (!mediaObserver) return;
+  mediaObserver.disconnect();
+  mediaObserver = null;
+  cleanupMediaInTree(document, { immediate: true });
+}
+
 function startMediaObserver() {
-  const observer = new MutationObserver((mutations) => {
+  if (mediaObserver) return;
+
+  mediaObserver = new MutationObserver((mutations) => {
     let shouldRefreshIcons = false;
     let shouldRefreshLogo = false;
 
@@ -2461,8 +2718,15 @@ function startMediaObserver() {
 
           collectAndApplyMedia(node);
           collectAndApplyLinks(node);
-          shouldRefreshIcons = true;
-          shouldRefreshLogo = true;
+          if (hasRelevantThemeMutationTarget(node)) {
+            shouldRefreshIcons = true;
+          }
+          if (node.matches("img") || node.querySelector("img")) {
+            shouldRefreshLogo = true;
+          }
+        });
+        mutation.removedNodes.forEach((node) => {
+          cleanupMediaInTree(node);
         });
         return;
       }
@@ -2470,6 +2734,9 @@ function startMediaObserver() {
       if (mutation.type === "attributes" && mutation.target instanceof Element) {
         if (mutation.target.matches("audio, video")) {
           attachMediaWatch(mutation.target);
+        }
+        if (!hasRelevantThemeMutationTarget(mutation.target)) {
+          return;
         }
         shouldRefreshIcons = true;
         if (mutation.target instanceof HTMLImageElement) {
@@ -2486,11 +2753,11 @@ function startMediaObserver() {
     }
   });
 
-  observer.observe(document.documentElement, {
+  mediaObserver.observe(document.documentElement, {
     childList: true,
     subtree: true,
     attributes: true,
-    attributeFilter: ["class", "style", "aria-label", "aria-pressed", "title", "src", "data-testid"]
+    attributeFilter: ["class", "aria-label", "aria-pressed", "title", "src", "data-testid"]
   });
 }
 
@@ -2523,6 +2790,7 @@ function applySettings(incoming) {
   currentSettings = normalizeSettings(incoming);
 
   if (!isSupportedWebplayerUrl(window.location.href)) {
+    stopMediaObserver();
     applyDarkModeToPage("original");
     clearIconControlStyling();
     removeCustomLogoReplacements();
@@ -2531,6 +2799,7 @@ function applySettings(incoming) {
     return;
   }
 
+  startMediaObserver();
   ensureSpeedPopover();
   syncSpeedPopoverUi();
   applyPlaybackSpeed(currentSettings.playbackSpeed);
